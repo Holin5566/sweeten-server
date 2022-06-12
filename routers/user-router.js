@@ -7,4 +7,9 @@ router.use((req, res, next) => {
   next();
 });
 
+// TODO 會員編輯
+// TODO 喜好 CRUD
+// TODO 評論 CRUD
+// TODO 評分 RU
+
 module.exports = router;

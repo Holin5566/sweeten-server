@@ -8,6 +8,7 @@ router.use((req, res, next) => {
   next();
 });
 
+// TODO 註冊會員
 router.get("/signup", async (req, res) => {
   try {
     const hash = await argon2.hash("password");
@@ -16,5 +17,10 @@ router.get("/signup", async (req, res) => {
     (e) => res.send(e);
   }
 });
+
+// TODO middleware 驗證身分
+
+// TODO 會員登入
+// TODO 會員登出
 
 module.exports = router;
