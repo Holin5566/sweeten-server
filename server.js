@@ -1,11 +1,21 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const { authRouter, userRouter } = require("./routers");
+const {
+  authRouter,
+  userRouter,
+  productRouter,
+  lessonRouter,
+  couponRouter,
+} = require("./routers");
 const pool = require("./utils/dbConnect");
 require("dotenv").config();
 
 app.use(cors());
+
+//bodyparser
+app.use(express.urlencoded({ extends: true }));
+app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("sweteen server");
@@ -14,9 +24,12 @@ app.get("/", (req, res) => {
 // NOTE routers
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
+app.use("/api/product", productRouter);
+app.use("/api/lesson", lessonRouter);
+app.use("/api/coupon", couponRouter);
 
 // NOTE 404
-app.use((req, res, next) => {
+app.use("/*", (req, res, next) => {
   console.log("所有路由的後面 ==> 404", req.path);
   res.status(404).send("Not Found");
 });
