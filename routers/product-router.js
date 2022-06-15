@@ -24,6 +24,7 @@ router.get("/:id", async (req, res, next) => {
     res.send(e);
   }
 });
+//0
 
 // FIXME product 資料表的 address 和 payment 欄位
 // [完成] Create Product
