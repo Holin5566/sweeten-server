@@ -1,7 +1,7 @@
 const express = require("express");
 const { app } = require("firebase-admin");
 const router = express.Router();
-const { uuid } = require("uuidv4");
+const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
 
 // 專案建立的資料庫模組
@@ -13,35 +13,125 @@ router.use((req, res, next) => {
 });
 
 // TODO 商品 CRUD
-// 完成 從 product 資料表 Read 資料
+// [完成] Read Product
 router.get("/:id", async (req, res, next) => {
   try {
     let [product] = await pool.execute("SELECT * FROM product WHERE id = ?", [
       req.params.id,
     ]);
     res.send(product);
-    console.log(new Date());
   } catch (e) {
     res.send(e);
   }
 });
 
-// Create
-router.post("/create", async (req, res, next) => {
-  let { name, price, description, express_id, address, payment } = req.body;
+// FIXME product 資料表的 address 和 payment 欄位
+// [完成] Create Product
+router.post("/", async (req, res, next) => {
+  let id = uuidv4(); // 好像有 auto increment 還要用 uuid 嗎
+  let created_at = new Date();
+  let { name, price, description, express_id } = req.body;
 
-  // 時區要看一下
-  // INSERT INTO `product` (`id`, `name`, `price`, `description`, `express_id`, `address`, `payment`, `created_at`) VALUES ('2', '蛋糕2號', '1500', '好好吃', '2', '嘉義', '信用卡', '20220614');
+  let [insertData] = await pool.execute(
+    // query excute 差異
+    "INSERT INTO product (id, name, price, description, express_id, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+    [id, name, price, description, express_id, created_at]
+  );
+  console.log("New Product Data: ", insertData); // insertedData 是甚麼，為甚麼不是存入的資料
+  res.send("Thanks for poasting.");
 });
 
-// Uudate
+// Update Product
+router.patch("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  const newData = req.body;
 
-// Delete
-router.delete("/delete/:id", (req, res, next) => {
-  res.send("The product has been deleted");
+  // const sql = `UPDATE product SET name = ?, price = ?, description = ?,express_id = ?, address = ?, payment = ?  WHERE id = ?`;
+
+  // try {
+  //   let [updateData] = await pool.execute(sql, [
+  //     name,
+  //     price,
+  //     description,
+  //     express_id,
+  //     address,
+  //     payment,
+  //     id,
+  //   ]);
+  //   console.log("Update Data: ", updateData);
+  //   res.send("updated successfully.");
+  // } catch (e) {
+  //   res.send(e);
+  // }
+
+  const [data] = await pool.execute(`SELECT * FROM product WHERE id = ?`, [id]);
+  const preData = data[0];
+
+  const sql = `UPDATE product 
+  SET name = ?, price = ?, description = ?, express_id = ?
+  WHERE id = ?`;
+  const query = [];
+
+  res.send(query);
+
+  // try {
+  //   let [updateData] = await pool.execute(sql, [name, price, id]);
+  //   console.log("Update Data: ", updateData);
+  //   res.send("updated successfully.");
+  // } catch (e) {
+  //   res.send(e);
+  // }
+});
+
+// [完成] Delete
+router.delete("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  let [deletedData] = await pool.execute("DELETE FROM product WHERE id = ?", [
+    id,
+  ]);
+  console.log("Deleted Data: ", deletedData);
+  res.send("The data has been deleted.");
 });
 
 // TODO 評論 CRUD
-// TODO 評分 RU
+// [完成] Read Product Comment
+router.get("/comment/:id", async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    let [readProductComment] = await pool.execute(
+      "SELECT * FROM comment WHERE id = ?",
+      [id]
+    );
+    res.send(readProductComment);
+  } catch (e) {
+    req.send(e);
+  }
+});
+
+// 評論 Create
+router.post("/comment", async (req, res, next) => {
+  let { user_id, product_id, content, score } = req.body;
+  let created_at = new Date();
+
+  let [createProductComment] = await pool.execute(
+    "INSERT INTO comment ( user_id, product_id, content, score, created_at) VALUES (?, ?, ?, ?, ?)",
+    [user_id, product_id, content, score, created_at]
+  );
+  console.log(createProductComment);
+  res.send("新增評論成功");
+});
+
+// 評論 Update
+
+// 評論 Delete
+router.delete("/comment/:id", async (req, res, next) => {
+  let { id } = req.params;
+  let [deletedProductComment] = await pool.execute(
+    "DELETE FROM comment WHERE id = ?",
+    [id]
+  );
+  console.log("Deleted Data: ", deletedProductComment);
+  res.send("The comment has been deleted.");
+});
 
 module.exports = router;
