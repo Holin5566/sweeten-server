@@ -13,7 +13,17 @@ router.use((req, res, next) => {
 });
 
 // TODO 商品 CRUD
-// [完成] Read Product
+// [完成] Read Product (所有產品)
+router.get("/", async (req, res, next) => {
+  try {
+    let [products] = await pool.execute("SELECT * FROM product");
+    res.send(products);
+  } catch (e) {
+    res.send(e);
+  }
+});
+
+// [完成] Read Product (個別產品)
 router.get("/:id", async (req, res, next) => {
   try {
     let [product] = await pool.execute("SELECT * FROM product WHERE id = ?", [
