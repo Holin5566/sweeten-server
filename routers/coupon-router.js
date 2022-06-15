@@ -11,7 +11,7 @@ router.use((req, res, next) => {
 });
 
 // TODO 酷碰 CRUD
-// Read coupon (所有庫碰)
+// [完成] Read coupon (所有酷碰)
 router.get("/", async (req, res, next) => {
   try {
     let [coupons] = await pool.execute("SELECT * FROM coupon");
@@ -21,7 +21,38 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// TODO 評論 CRUD
-// TODO 評分 RU
+// [完成] Read coupon (各別酷碰)
+router.get("/:id", async (req, res, next) => {
+  let { id } = req.params;
+  try {
+    let [coupon] = await pool.execute("SELECT * FROM coupon WHERE id = ?", [
+      id,
+    ]);
+    res.send(coupon);
+  } catch (e) {
+    res.send(e);
+  }
+});
+
+// [完成] Create coupon
+router.post("/", async (req, res, next) => {
+  let { name, code, discount, start_date, end_date, limited } = req.body;
+  let [insertCoupon] = await pool.execute(
+    "INSERT INTO coupon (name, code, discount, start_date, end_date, limited) VALUES (?, ?, ?, ?, ?, ?)",
+    [name, code, discount, start_date, end_date, limited]
+  );
+  res.send(insertCoupon);
+});
+
+// Update coupon
+
+// [完成] Delete coupon
+router.delete("/:id", async (req, res, next) => {
+  let { id } = req.params;
+  let [deleteCoupon] = await pool.execute("DELETE FROM coupon WHERE id = ?", [
+    id,
+  ]);
+  res.send("The coupon has been deleted");
+});
 
 module.exports = router;
