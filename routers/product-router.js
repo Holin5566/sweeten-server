@@ -56,6 +56,31 @@ router.patch("/:id", async (req, res, next) => {
   const { id } = req.params;
   const newData = req.body;
 
+  // =====
+  const preDataSql = "SELECT * FROM product WHERE id = ?";
+  const [preData] = await pool.execute(preDataSql, [id]);
+  res.send(preData);
+
+  const preName = preData[0].name;
+  const prePrice = preData[0].price;
+  const preDescription = preData[0].description;
+  const preexpressId = preData[0].express_id;
+
+  console.log(preName, prePrice, preDescription, preexpressId);
+
+  
+  // const sql = `UPDATE product SET name = ?, price = ?, description = ?,express_id = ?  WHERE id = ?`;
+
+  // let [updateData] = await pool.execute(sql, [
+  //   name,
+  //   price,
+  //   description,
+  //   express_id,
+  //   id,
+  // ]);
+
+  // =====
+  
   // const sql = `UPDATE product SET name = ?, price = ?, description = ?,express_id = ?, address = ?, payment = ?  WHERE id = ?`;
 
   // try {
@@ -74,15 +99,17 @@ router.patch("/:id", async (req, res, next) => {
   //   res.send(e);
   // }
 
-  const [data] = await pool.execute(`SELECT * FROM product WHERE id = ?`, [id]);
-  const preData = data[0];
+  // 沒註解
+  // const [data] = await pool.execute(`SELECT * FROM product WHERE id = ?`, [id]);
+  // const preData = data[0];
 
-  const sql = `UPDATE product 
-  SET name = ?, price = ?, description = ?, express_id = ?
-  WHERE id = ?`;
-  const query = [];
+  // const sql = `UPDATE product
+  // SET name = ?, price = ?, description = ?, express_id = ?
+  // WHERE id = ?`;
+  // const query = [];
 
-  res.send(query);
+  // res.send(query);
+  // 沒註解
 
   // try {
   //   let [updateData] = await pool.execute(sql, [name, price, id]);
