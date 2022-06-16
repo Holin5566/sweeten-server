@@ -19,10 +19,12 @@ router.get("/:id", async (req, res, next) => {
     let [product] = await pool.execute("SELECT * FROM product WHERE id = ?", [
       req.params.id,
     ]);
+
     res.send(product);
   } catch (e) {
     res.send(e);
   }
+  console.log(req.params.id);
 });
 //0
 
