@@ -45,6 +45,39 @@ router.post("/", async (req, res, next) => {
 });
 
 // Update coupon
+router.patch("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  const newCoupon = req.body;
+
+  const getPreCouponSql = "SELECT * FROM coupon WHERE id = ?";
+  const [preparedCouponSql] = await pool.execute(getPreCouponSql, [id]);
+
+  let sql = "";
+  let sqlPreparedArr = [];
+
+  for (let key in preparedCouponSql[0]) {
+    // console.log(key);
+    if (newCoupon[key]) {
+      sql += key + " = ?, ";
+      sqlPreparedArr.push(newCoupon[key]);
+    }
+  }
+  // console.log(sql);
+  // console.log(sqlPreparedArr);
+
+  sql = "UPDATE coupon SET " + sql.slice(0, -2) + " WHERE id = ?";
+  // console.log(sql);
+  sqlPreparedArr.push(`${id}`);
+  // console.log(sqlPreparedArr)
+
+  try {
+    const [updateCoupon] = await pool.execute(sql, sqlPreparedArr);
+    res.send("Update the coupon successfully.");
+  } catch (e) {
+    res.status(404);
+    res.send(e);
+  }
+});
 
 // [完成] Delete coupon
 router.delete("/:id", async (req, res, next) => {
