@@ -12,6 +12,7 @@ const pool = mysql
     dateStrings: true,
   })
   .promise();
+
 pool
   .execute("SELECT * FROM product")
   .then(() => console.log(`connect to ${process.env.DB_NAME}`))
