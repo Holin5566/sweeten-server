@@ -44,7 +44,7 @@ router.post("/", async (req, res, next) => {
   res.send(insertCoupon);
 });
 
-// Update coupon
+// [完成] Update coupon
 router.patch("/:id", async (req, res, next) => {
   const { id } = req.params;
   const newCoupon = req.body;
