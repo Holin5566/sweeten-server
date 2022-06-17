@@ -39,14 +39,14 @@ router.get("/:id", async (req, res, next) => {
 // FIXME product 資料表的 address 和 payment 欄位
 // [完成] Create Product
 router.post("/", async (req, res, next) => {
-  let id = uuidv4(); // 好像有 auto increment 還要用 uuid 嗎
+  // let id = uuidv4(); // 好像有 auto increment 還要用 uuid 嗎
   let created_at = new Date();
   let { name, price, description, express_id } = req.body;
 
   let [insertData] = await pool.execute(
     // query excute 差異
-    "INSERT INTO product (id, name, price, description, express_id, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-    [id, name, price, description, express_id, created_at]
+    "INSERT INTO product ( name, price, description, express_id, created_at) VALUES ( ?, ?, ?, ?, ?)",
+    [name, price, description, express_id, created_at]
   );
   console.log("New Product Data: ", insertData); // insertedData 是甚麼，為甚麼不是存入的資料
   res.send("Thanks for poasting.");
@@ -103,8 +103,9 @@ router.patch("/:id", async (req, res, next) => {
 
   try {
     let [updateData] = await pool.execute(sql, sqlPreparedArr);
-    res.send(`product ${id} has already been updated.`, updateData);
+    res.send(`product ${id} has already been updated.`);
   } catch (e) {
+    res.status(404);
     res.send(e);
   }
 });
