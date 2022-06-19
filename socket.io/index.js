@@ -1,11 +1,8 @@
 module.exports = (io) => {
   io.on("connection", (socket) => {
     console.log("connect socketio");
-    socket.on("message", (message) => {
-      logger.log("info", message.value);
-      socket.emit("ditConsumer", message.value);
-      console.log("from console", message.value);
-    });
+
+    require("./onlineSupport")(socket);
   });
 };
 
