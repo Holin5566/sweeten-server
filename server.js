@@ -40,10 +40,6 @@ app.use(
   expressSession({ secret: "test", resave: false, saveUninitialized: false })
 );
 
-//bodyparser
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
 app.get("/", (req, res) => {
   res.send("sweteen server");
 });
