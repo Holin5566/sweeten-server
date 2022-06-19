@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const uuid = require("uuid");
 const {
   authRouter,
   userRouter,
@@ -12,64 +11,30 @@ const {
 const pool = require("./utils/dbConnect");
 require("dotenv").config();
 
-// NOTE socketio
+// NOTE 連接 socketio
 const { Server } = require("socket.io");
-const { createServer } = require("http");
-const httpServer = createServer(app);
+const httpServer = require("http").createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
   },
 });
+require("./socket.io")(io);
 
-// 取得 client 連線數量
-// const count = io.engine.clientsCount;
-
-// 設定標頭 (一個用戶一次)
-// io.engine.on("initial_headers", (headers, req) => {
-//   headers["test"] = "123";
-//   headers["set-cookie"] = "mycookie=456";
-// });
-
-// 設定每個標頭
-// io.engine.on("initial_headers", (headers, req) => {
-//   headers["test"] = "123";
-//   headers["set-cookie"] = "mycookie=456";
-// });
-
-// catch error
-io.engine.on("connection_error", (err) => {
-  console.log(err.req); // the request object
-  console.log(err.code); // the error code, for example 1
-  console.log(err.message); // the error message, for example "Session ID unknown"
-  console.log(err.context); // some additional error context
-});
-
-// socketsJoin: makes the matching socket instances join the specified rooms
-// 加入指定房間
-// ̀socketsLeave: makes the matching socket instances leave the specified rooms
-// 離開指定房間
-// disconnectSockets: makes the matching socket instances disconnect
-// 斷開連線
-// fetchSockets: returns the matching socket instances
-// 取得目前client
-
-io.on("connection", (socket) => {
-  // ...
-});
-
+// NOTE cors
 app.use(
   cors({
     origin: ["http://localhost:3000"],
     credentials: true,
   })
 );
-//解析body
+
+// NOTE bady parser
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// 啟用 session
+// NOTE 啟用 session
 const expressSession = require("express-session");
 app.use(
   expressSession({ secret: "test", resave: false, saveUninitialized: false })

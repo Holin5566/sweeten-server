@@ -1,5 +1,4 @@
 const express = require("express");
-const { app } = require("firebase-admin");
 const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const { empty } = require("uuidv4");
