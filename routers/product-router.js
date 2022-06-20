@@ -17,8 +17,74 @@ router.use((req, res, next) => {
 // [完成] Read Product (所有產品)
 router.get("/", async (req, res, next) => {
   try {
+    // 沒有頁碼的情況
+    // let [products] = await pool.execute("SELECT * FROM product");
+
+    // 頁碼
+    // 過濾參數用 query string 來傳遞
+    // 取得目前在第幾頁，而且利用 || 這個特性來做預設值
+    // console.log(req.query.page)   // 如果網址上沒有 page 這個 query string，那 req.query.page 會是 undefined(false)
+    let page = req.query.page || 1;
+    // console.log("current page: ", page);
+
+    // 取得目前的總筆數
     let [products] = await pool.execute("SELECT * FROM product");
-    res.send(products);
+    const totalRecords = products.length;
+    // console.log("total records: ", totalRecords);
+
+    // 計算總共有幾頁
+    let perPage = 5;
+    let totalPage = Math.ceil(totalRecords / perPage);
+    // console.log("total page: ", totalPage);
+
+    // 計算 offset 是多少(計算要跳過幾筆)
+    let offset = (page - 1) * perPage;
+    // console.log("offset: ", offset);
+
+    // 取得這一頁的資料 select * ... limit ? offset ?
+    let [pageResult] = await pool.execute(
+      "SELECT * FROM product ORDER BY id ASC LIMIT ? OFFSET ?",
+      [perPage, offset]
+    );
+    // console.log(pageResult)
+
+    // 回覆給前端
+    if (pageResult.length === 0) {
+      res.status(404).json(pageResult);
+    } else {
+      res.json({
+        pagination: {
+          totalRecords,
+          totalPage,
+          page,
+        },
+        data: pageResult,
+      });
+    }
+
+    // ========== 施工中 ==========
+
+    // 篩選
+    // 種類：蛋糕(cake) 點心(snack) 禮盒(box) 冰淇淋(iceCream)
+
+    // 取得種類
+    let categoryId = req.query.categoryId;
+    // console.log(categoryId);
+
+    if (categoryId !== undefined) {
+      let [categoryResult] = await pool.execute(
+        `
+      SELECT product.name AS product_name, product_category.*, category.name AS category_name 
+      FROM product, product_category, category 
+      WHERE product_category.product_id = product.id AND product_category.category_id=category.id AND category.id = ?`,
+        [categoryId]
+      );
+      console.log(categoryResult);
+    }
+
+    // 價格
+
+    // ========== 施工中 ==========
   } catch (e) {
     res.send(e);
   }
