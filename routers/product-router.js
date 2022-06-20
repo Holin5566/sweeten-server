@@ -1,5 +1,4 @@
 const express = require("express");
-const { app } = require("firebase-admin");
 const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const { empty } = require("uuidv4");
@@ -149,10 +148,41 @@ router.post("/comment", async (req, res, next) => {
   res.send("新增評論成功");
 });
 
-// 評論 Update
+// [完成] 評論 Update
 router.patch("/comment/:id", async (req, res, next) => {
   const { id } = req.params;
-  
+  const newComment = req.body;
+
+  const [preComment] = await pool.execute(
+    "SELECT * FROM comment WHERE id = ?",
+    [id]
+  );
+
+  let sql = "";
+  let sqlPreparedArr = [];
+
+  for (let key in preComment[0]) {
+    // console.log(key)
+    if (newComment[key]) {
+      sql += key + " = ?, ";
+      sqlPreparedArr.push(newComment[key]);
+    }
+  }
+  // console.log(sql);
+  // console.log(sqlPreparedArr);
+
+  sql = "UPDATE comment SET " + sql.slice(0, -2) + " Where id = ?";
+  // console.log(sql);
+  sqlPreparedArr.push(`${id}`);
+  // console.log(sqlPreparedArr)
+
+  try {
+    const [updateComment] = await pool.execute(sql, sqlPreparedArr);
+    res.send("The comment has been updated.");
+  } catch (e) {
+    res.status(404);
+    res.send(e);
+  }
 });
 
 // [完成] 評論 Delete

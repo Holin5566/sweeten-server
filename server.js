@@ -11,25 +11,34 @@ const {
 const pool = require("./utils/dbConnect");
 require("dotenv").config();
 
+// NOTE 連接 socketio
+const { Server } = require("socket.io");
+const httpServer = require("http").createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+require("./socket.io")(io);
+
+// NOTE cors
 app.use(
   cors({
     origin: ["http://localhost:3000"],
     credentials: true,
   })
 );
-//解析body
+
+// NOTE bady parser
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// 啟用 session
+// NOTE 啟用 session
 const expressSession = require("express-session");
 app.use(
   expressSession({ secret: "test", resave: false, saveUninitialized: false })
 );
-
-//bodyparser
-app.use(express.urlencoded({ extends: true }));
-app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("sweteen server");
@@ -49,6 +58,10 @@ app.use("/*", (req, res, next) => {
   res.status(404).send("Not Found");
 });
 
-app.listen(process.env.SERVER_PORT || 8001, () => {
-  console.log(`sweeten server is running on ${process.env.SERVER_PORT}`);
-});
+httpServer.listen(process.env.SERVER_PORT || 8001, () =>
+  console.log("server running on " + process.env.SERVER_PORT)
+);
+
+// const server = app.listen(process.env.SERVER_PORT || 8001, () => {
+//   console.log(`sweeten server is running on ${process.env.SERVER_PORT}`);
+// });
