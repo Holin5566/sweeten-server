@@ -4,4 +4,5 @@ module.exports = {
   productRouter: require("./product-router"),
   lessonRouter: require("./lesson-router"),
   couponRouter: require("./coupon-router"),
+  orderRouter: require("./order-router"),
 };

@@ -20,6 +20,19 @@ router.get("/", async (req, res, next) => {
     // 沒有頁碼的情況
     // let [products] = await pool.execute("SELECT * FROM product");
 
+    // 篩選
+    // [價格] ASC DESC
+    let priceOrder = req.query.priceOrder;
+    // console.log(priceOrder);
+
+    if (priceOrder == "2") {
+      orderByPrice = "DESC";
+      // console.log(orderByPrice);
+    } else {
+      orderByPrice = "ASC";
+      // console.log(orderByPrice);
+    }
+
     // 頁碼
     // 過濾參數用 query string 來傳遞
     // 取得目前在第幾頁，而且利用 || 這個特性來做預設值
@@ -43,7 +56,7 @@ router.get("/", async (req, res, next) => {
 
     // 取得這一頁的資料 select * ... limit ? offset ?
     let [pageResult] = await pool.execute(
-      "SELECT * FROM product ORDER BY id ASC LIMIT ? OFFSET ?",
+      `SELECT * FROM product ORDER BY price ${orderByPrice} LIMIT ? OFFSET ?`,
       [perPage, offset]
     );
     // console.log(pageResult)
@@ -61,34 +74,33 @@ router.get("/", async (req, res, next) => {
         data: pageResult,
       });
     }
-
-    // ========== 施工中 ==========
-
-    // 篩選
-    // 種類：蛋糕(cake) 點心(snack) 禮盒(box) 冰淇淋(iceCream)
-
-    // 取得種類
-    let categoryId = req.query.categoryId;
-    // console.log(categoryId);
-
-    if (categoryId !== undefined) {
-      let [categoryResult] = await pool.execute(
-        `
-      SELECT product.name AS product_name, product_category.*, category.name AS category_name 
-      FROM product, product_category, category 
-      WHERE product_category.product_id = product.id AND product_category.category_id=category.id AND category.id = ?`,
-        [categoryId]
-      );
-      console.log(categoryResult);
-    }
-
-    // 價格
-
-    // ========== 施工中 ==========
   } catch (e) {
     res.send(e);
   }
 });
+
+// ========== 施工中 ==========
+router.get("/category", async (req, res, next) => {
+  // 篩選
+  // [種類]：蛋糕(cake) 點心(snack) 禮盒(box) 冰淇淋(iceCream)
+
+  // 取得種類
+  let categoryId = req.query.categoryId;
+  // console.log(categoryId);
+
+  if (categoryId !== undefined) {
+    let [categoryResult] = await pool.execute(
+      `
+      SELECT product.name AS product_name, product_category.*, category.name AS category_name 
+      FROM product, product_category, category 
+      WHERE product_category.product_id = product.id AND product_category.category_id=category.id AND category.id = ? LIMIT 1`,
+      [categoryId]
+    );
+    // console.log(categoryResult);
+  }
+  res.send("");
+});
+// ========== 施工中 ==========
 
 // [完成] Read Product (個別產品)
 router.get("/:id", async (req, res, next) => {

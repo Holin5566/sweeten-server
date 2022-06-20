@@ -7,6 +7,7 @@ const {
   productRouter,
   lessonRouter,
   couponRouter,
+  orderRouter,
 } = require("./routers");
 const pool = require("./utils/dbConnect");
 require("dotenv").config();
@@ -41,6 +42,7 @@ app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/lesson", lessonRouter);
 app.use("/api/coupon", couponRouter);
+app.use("/api/order", orderRouter);
 
 // NOTE 404
 app.use("/*", (req, res, next) => {
