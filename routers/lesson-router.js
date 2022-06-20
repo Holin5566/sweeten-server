@@ -171,8 +171,8 @@ router.delete("/comment/:product_id", async (req, res, next) => {
 });
 
 // TODO 評分 RU
-// 課程評分 Read (個別課程評分)
-router.get("/comment/:product_id", async (req, res, next) => {
+// [完成] 課程評分 Read (個別課程評分)
+router.get("/score/:product_id", async (req, res, next) => {
   const { product_id } = req.params;
 
   try {
@@ -187,5 +187,21 @@ router.get("/comment/:product_id", async (req, res, next) => {
   }
 });
 
+// [完成] 課程評分 Update
+router.patch("/score/:product_id", async (req, res, next) => {
+  const { product_id } = req.params;
+  const { score } = req.body;
+
+  try {
+    const [updatedLessonComment] = await pool.execute(
+      "UPDATE comment SET score = ? WHERE product_id = ?",
+      [score, product_id]
+    );
+    res.send("Score has been updated successfully.");
+  } catch (e) {
+    res.status(404);
+    res.send(e);
+  }
+});
 
 module.exports = router;
