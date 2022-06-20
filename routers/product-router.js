@@ -1,5 +1,4 @@
 const express = require("express");
-const { app } = require("firebase-admin");
 const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const { empty } = require("uuidv4");
@@ -108,11 +107,13 @@ router.get("/:id", async (req, res, next) => {
     let [product] = await pool.execute("SELECT * FROM product WHERE id = ?", [
       req.params.id,
     ]);
+
     res.send(product);
   } catch (e) {
     res.send(e);
   }
 });
+//0
 
 // FIXME product 資料表的 address 和 payment 欄位
 // [完成] Create Product
