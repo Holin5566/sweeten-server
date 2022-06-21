@@ -1,3 +1,30 @@
+// =============== 縣市 * 12 ===============
+const countryMaker = (id, name) => {
+  return { id, name };
+};
+
+const countryName = [
+  "台北",
+  "新北",
+  "桃園",
+  "台中",
+  "台南",
+  "高雄",
+  "基隆",
+  "新竹",
+  "嘉義",
+  "雲林",
+  "彰化",
+  "宜蘭",
+];
+
+const setCountry = [];
+
+for (let i = 1; i < 13; i++) {
+  setCountry.push(countryMaker(`${i}`, countryName[i - 1]));
+}
+// console.log(setCountry);
+
 // =============== 使用者 * 10 ===============
 
 const userMaker = (
@@ -119,11 +146,12 @@ const users = [];
 for (let i = 1; i < 11; i++) {
   users.push(
     userMaker(
-      `user ${i}`,
+      `${i}`,
       varName(),
       `${i}${i}${i}@gmail.com`,
       "12345",
-      varBirth(),
+      // varBirth(),
+      new Date(),
       varGender(),
       varCountry(),
       new Date(),
@@ -226,6 +254,7 @@ for (let i = 1; i < 51; i++) {
 // list[Math.random()]
 
 module.exports = {
+  setCountry,
   users,
   products,
   lessons,
