@@ -78,28 +78,68 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// ========== 施工中 ==========
-router.get("/category", async (req, res, next) => {
-  // 篩選
-  // [種類]：蛋糕(cake) 點心(snack) 禮盒(box) 冰淇淋(iceCream)
+router.get("/category/:categoryId", async (req, res, next) => {
+  try {
+    // 價格排序
+    let priceOrder = req.query.priceOrder;
+    if (priceOrder == "2") {
+      orderByPrice = "DESC";
+    } else {
+      orderByPrice = "ASC";
+    }
 
-  // 取得種類
-  let categoryId = req.query.categoryId;
-  // console.log(categoryId);
+    // 種類篩選
+    let { categoryId } = req.params;
 
-  if (categoryId !== undefined) {
-    let [categoryResult] = await pool.execute(
-      `
-      SELECT product.name AS product_name, product_category.*, category.name AS category_name 
+    // 頁碼
+    let page = req.query.page || 1;
+
+    // 取得目前的總筆數
+    const [product] = await pool.execute(
+      `SELECT product.name AS product, product.price, product.description, product.express_id, category.name AS category 
       FROM product, product_category, category 
-      WHERE product_category.product_id = product.id AND product_category.category_id=category.id AND category.id = ? LIMIT 1`,
+      WHERE product_category.product_id = product.id AND product_category.category_id = category.id AND category.id = ?`,
       [categoryId]
     );
-    // console.log(categoryResult);
+    const totalResults = product.length;
+
+    // 計算總共有幾頁
+    const perPage = 5;
+    const totalPage = Math.ceil(totalResults / perPage);
+    // console.log(totalPage);
+
+    // 計算 offset 是多少(計算要跳過幾筆)
+    const offset = (page - 1) * perPage;
+    // console.log(offset);
+
+    // 取得這一頁的資料 select * ... limit ? offset ?
+    const [pageResult] = await pool.execute(
+      `SELECT product.name AS product, product.price, product.description, product.express_id, category.name AS category 
+      FROM product, product_category, category 
+      WHERE product_category.product_id = product.id AND product_category.category_id = category.id AND category.id = ?
+      ORDER BY price ${orderByPrice}
+      LIMIT ?
+      OFFSET ?`,
+      [categoryId, perPage, offset]
+    );
+
+    // 回覆給前端
+    if (pageResult.length === 0) {
+      res.status(404).json(pageResult);
+    } else {
+      res.json({
+        pagination: {
+          totalResults,
+          totalPage,
+          page,
+        },
+        data: pageResult,
+      });
+    }
+  } catch (e) {
+    res.status(404).send(e);
   }
-  res.send("");
 });
-// ========== 施工中 ==========
 
 // [完成] Read Product (個別產品)
 router.get("/:id", async (req, res, next) => {
