@@ -5,4 +5,5 @@ module.exports = {
   lessonRouter: require("./lesson-router"),
   couponRouter: require("./coupon-router"),
   orderRouter: require("./order-router"),
+  setFakeData: require("./setFakeData"),
 };

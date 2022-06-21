@@ -1,0 +1,30 @@
+const {
+  users,
+  products,
+  lessons,
+  likedLesson,
+  likedProduct,
+} = require("./fakeData");
+
+const express = require("express");
+const router = express.Router();
+require("dotenv").config();
+
+// 專案建立的資料庫模組
+const pool = require("../utils/dbConnect");
+
+router.post("/", async (req, res, next) => {
+  users.map((user) => {
+    console.log(`INSERT INTO user (full_name, email) VALUES ?,?)`, [
+      user.fullname,
+      user.email,
+    ]);
+  });
+
+  // const [setData] = await pool.execute(
+  //   `INSERT INTO user (id, fullname, email, password, birthday, gender_id, country_id, created_at, phone, user_photo_id, valid) VALUES (${user})`
+  // );
+  res.send("新增資料成功");
+});
+
+module.exports = router;
