@@ -114,7 +114,7 @@ router.get("/comment/:product_id", async (req, res, next) => {
   const { product_id } = req.params;
   try {
     const [allLessonComment] = await pool.execute(
-      "SELECT * FROM comment WHERE product_id = ?",
+      "SELECT * FROM comment WHERE product_id = ? ORDER BY created_at DESC",
       [product_id]
     );
     res.send(allLessonComment);
@@ -138,14 +138,14 @@ router.post("/comment", async (req, res, next) => {
 });
 
 // [完成] 課程評論 Update
-router.patch("/comment/:product_id", async (req, res, next) => {
-  const { product_id } = req.params;
+router.patch("/comment/:id", async (req, res, next) => {
+  const { id } = req.params;
   const { content } = req.body;
 
   try {
     const [updatedLessonComment] = await pool.execute(
-      "UPDATE comment SET content = ? WHERE product_id = ?",
-      [content, product_id]
+      "UPDATE comment SET content = ? WHERE id = ?",
+      [content, id]
     );
     res.send("Comment has been updated successfully.");
   } catch (e) {
@@ -155,13 +155,13 @@ router.patch("/comment/:product_id", async (req, res, next) => {
 });
 
 // [完成] 課程評論 Delete
-router.delete("/comment/:product_id", async (req, res, next) => {
-  let { product_id } = req.params;
+router.delete("/comment/:id", async (req, res, next) => {
+  let { id } = req.params;
 
   try {
     let [deletedProductComment] = await pool.execute(
       "DELETE FROM comment WHERE id = ?",
-      [product_id]
+      [id]
     );
     res.send("The comment has been deleted.");
   } catch (e) {
@@ -171,7 +171,7 @@ router.delete("/comment/:product_id", async (req, res, next) => {
 });
 
 // TODO 評分 RU
-// [完成] 課程評分 Read (個別課程評分)
+//  課程評分 Read (個別課程評分)
 router.get("/score/:product_id", async (req, res, next) => {
   const { product_id } = req.params;
 
@@ -187,15 +187,15 @@ router.get("/score/:product_id", async (req, res, next) => {
   }
 });
 
-// [完成] 課程評分 Update
-router.patch("/score/:product_id", async (req, res, next) => {
-  const { product_id } = req.params;
+//  課程評分 Update
+router.patch("/score/:id", async (req, res, next) => {
+  const { id } = req.params;
   const { score } = req.body;
 
   try {
     const [updatedLessonComment] = await pool.execute(
-      "UPDATE comment SET score = ? WHERE product_id = ?",
-      [score, product_id]
+      "UPDATE comment SET score = ? WHERE id = ?",
+      [score, id]
     );
     res.send("Score has been updated successfully.");
   } catch (e) {
