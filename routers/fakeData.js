@@ -224,3 +224,11 @@ for (let i = 1; i < 51; i++) {
 // 亂數選字的方法 (參考)
 // const list = ["a","b","c"]
 // list[Math.random()]
+
+module.exports = {
+  users,
+  products,
+  lessons,
+  likedLesson,
+  likedProduct,
+};
