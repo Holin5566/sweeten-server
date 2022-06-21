@@ -14,8 +14,43 @@ router.use((req, res, next) => {
 // [完成] Read order (所有訂單)
 router.get("/", async (req, res, next) => {
   try {
-    const [allOrder] = await pool.execute("SELECT * FROM order_info");
-    res.send(allOrder);
+    // 沒有頁碼的情況
+    // const [allOrder] = await pool.execute("SELECT * FROM order_info");
+
+    // 取得目前頁數
+    const page = req.query.page;
+
+    // 取的所有資料筆數
+    const [order] = await pool.execute("SELECT * FROM order_info");
+    const totalResults = order.length;
+    // console.log(totalResults);
+
+    // 取得所有頁數
+    const perPage = 5;
+    const totalPage = Math.ceil(totalResults / perPage);
+    // console.log(totalPage);
+
+    // 計算要跳過幾筆
+    const offset = (page - 1) * perPage;
+    // console.log(offset);
+    const [pageResult] = await pool.execute(
+      "SELECT * FROM order_info ORDER BY timestamp DESC LIMIT ? OFFSET ?",
+      [perPage, offset]
+    );
+
+    // 回覆前端
+    if (pageResult.length === 0) {
+      res.status(404).json(pageResult);
+    } else {
+      res.json({
+        pagination: {
+          totalResults,
+          totalPage,
+          page,
+        },
+        data: pageResult,
+      });
+    }
   } catch (e) {
     res.status(404).send(e);
   }
@@ -25,11 +60,52 @@ router.get("/", async (req, res, next) => {
 router.get("/user/:user_id", async (req, res, next) => {
   const { user_id } = req.params;
   try {
-    const [order] = await pool.execute(
+    // 沒有頁碼的情況
+    // const [order] = await pool.execute(
+    //   "SELECT * FROM order_info WHERE user_id = ?",
+    //   [user_id]
+    // );
+
+    // 取得目前在第幾頁
+    const page = req.query.page;
+    // console.log(page)
+
+    // 取得總資料筆數
+    const [personalOrder] = await pool.execute(
       "SELECT * FROM order_info WHERE user_id = ?",
       [user_id]
     );
-    res.send(order);
+    const totalResults = personalOrder.length;
+    // console.log(totalResults)
+
+    // 取得總頁數
+    const perPage = 5;
+    const totalPage = Math.ceil(totalResults / perPage);
+    // console.log(totalPage)
+
+    // 計算要跳過的筆數
+    const offset = (page - 1) * perPage;
+    // console.log(offset);
+
+    // 取得這一頁的資料
+    const [pageResult] = await pool.execute(
+      "SELECT * FROM order_info WHERE user_id = ? ORDER BY timestamp DESC LIMIT ? OFFSET ?",
+      [user_id, perPage, offset]
+    );
+
+    // 回覆給前端
+    if (pageResult.length === 0) {
+      res.status(404).json(pageResult);
+    } else {
+      res.json({
+        pagination: {
+          totalResults,
+          totalPage,
+          page,
+        },
+        data: pageResult,
+      });
+    }
   } catch (e) {
     res.status(404).send(e);
   }
