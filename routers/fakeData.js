@@ -1,3 +1,17 @@
+// =============== 性別 ===============
+const genderMaker = (id, name) => {
+  return { id, name };
+};
+
+const genderName = ["男", "女", "不提供"];
+
+const setGender = [];
+
+for (let i = 1; i < 4; i++) {
+  setGender.push(genderMaker(`${i}`, genderName[i - 1]));
+}
+// console.log(setGender);
+
 // =============== 縣市 * 12 ===============
 const countryMaker = (id, name) => {
   return { id, name };
@@ -150,8 +164,7 @@ for (let i = 1; i < 11; i++) {
       varName(),
       `${i}${i}${i}@gmail.com`,
       "12345",
-      // varBirth(),
-      new Date(),
+      varBirth(),
       varGender(),
       varCountry(),
       new Date(),
@@ -162,6 +175,20 @@ for (let i = 1; i < 11; i++) {
   );
 }
 // console.log(users);
+
+// =============== express id ===============
+const expressIdMaker = (id, name) => {
+  return { id, name };
+};
+
+const expressName = ["低溫配送", "常溫配送", "店取"];
+
+const setExpressId = [];
+
+for (let i = 1; i < 4; i++) {
+  setExpressId.push(expressIdMaker(`${i}`, expressName[i - 1]));
+}
+// console.log(setExpressId);
 
 // =============== 產品 * 100 ===============
 const productMaker = (id, name, price, description, express_id, created_at) => {
@@ -254,8 +281,10 @@ for (let i = 1; i < 51; i++) {
 // list[Math.random()]
 
 module.exports = {
+  setGender,
   setCountry,
   users,
+  setExpressId,
   products,
   lessons,
   likedLesson,
