@@ -15,7 +15,7 @@ module.exports = (io) => {
 //   headers["set-cookie"] = "mycookie=456";
 // });
 
-// 設定每個標頭
+// 設定每次 req 標頭
 // io.engine.on("initial_headers", (headers, req) => {
 //   headers["test"] = "123";
 //   headers["set-cookie"] = "mycookie=456";
