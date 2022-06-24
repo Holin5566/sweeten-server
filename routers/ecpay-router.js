@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../utils/dbConnect");
-const ecpay_payment = require("ECPAY_Payment_node_js");
+const ecpay_payment = require("ecpay_aio_nodejs");
 require("dotenv").config();
 
 router.use((req, res, next) => {
