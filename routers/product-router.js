@@ -45,7 +45,7 @@ router.get("/", async (req, res, next) => {
     // console.log("total records: ", totalRecords);
 
     // 計算總共有幾頁
-    let perPage = 5;
+    let perPage = 10;
     let totalPage = Math.ceil(totalRecords / perPage);
     // console.log("total page: ", totalPage);
 
@@ -104,7 +104,7 @@ router.get("/category/:categoryId", async (req, res, next) => {
     const totalResults = product.length;
 
     // 計算總共有幾頁
-    const perPage = 5;
+    const perPage = 10;
     const totalPage = Math.ceil(totalResults / perPage);
     // console.log(totalPage);
 
