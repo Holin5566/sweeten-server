@@ -6,4 +6,5 @@ module.exports = {
   couponRouter: require("./coupon-router"),
   orderRouter: require("./order-router"),
   setFakeData: require("./setFakeData"),
+  ecpayRouter: require("./ecpay-router"),
 };

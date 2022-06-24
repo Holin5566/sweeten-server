@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const { empty } = require("uuidv4");
+
 require("dotenv").config();
 
 // 專案建立的資料庫模組
@@ -155,7 +156,6 @@ router.get("/:id", async (req, res, next) => {
 });
 //0
 
-// FIXME product 資料表的 address 和 payment 欄位
 // [完成] Create Product
 router.post("/", async (req, res, next) => {
   // let id = uuidv4(); // 好像有 auto increment 還要用 uuid 嗎
@@ -313,6 +313,14 @@ router.delete("/comment/:id", async (req, res, next) => {
   );
   console.log("Deleted Data: ", deletedProductComment);
   res.send("The comment has been deleted.");
+});
+
+// NOTE 上傳圖片
+const uploader = require("../utils/uploader");
+
+// upload.single("photo") -> 抓取 key = photo 的資料, 存入 storage
+router.post("/photo", uploader.single("photo"), (req, res) => {
+  res.send(req.file);
 });
 
 module.exports = router;

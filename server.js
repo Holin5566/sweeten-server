@@ -9,6 +9,7 @@ const {
   couponRouter,
   orderRouter,
   setFakeData,
+  ecpayRouter,
 } = require("./routers");
 const pool = require("./utils/dbConnect");
 require("dotenv").config();
@@ -43,6 +44,7 @@ app.use(
 );
 
 app.get("/", (req, res) => {
+  console.log("open server");
   res.send("sweteen server");
 });
 
@@ -56,6 +58,7 @@ app.use("/api/coupon", couponRouter);
 app.use("/api/order", orderRouter);
 // ----------------------------------------
 app.use("/setfakedata", setFakeData);
+app.use("/api/ecpay", ecpayRouter);
 
 // NOTE 404
 app.use("/*", (req, res, next) => {

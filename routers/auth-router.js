@@ -6,8 +6,34 @@ const pool = require("../utils/dbConnect");
 require("dotenv").config();
 
 router.use((req, res, next) => {
-  console.log("request is comming authRouter 有經過authrouter 喔");
+  console.log("request is comming authRouter");
   next();
+});
+router.post("/sucess", function (req, res) {
+  console.log("pay sucess");
+  res.redirect(301, "http://localhost:3000/main/test");
+});
+
+router.post("/pay", async (req, res) => {
+  // 信用卡號：4311-9522-2222-2222
+  // 有效日期：大於今日
+  // 安全碼：222
+  const ecpay_payment = require("ECPAY_Payment_node_js");
+  const base_param = {
+    MerchantTradeNo: "v3ruWV9RJ1JKnQxd3qg4", //post //請帶20碼uid, ex: f0a0d7e9fae1bb72bc93
+    MerchantTradeDate: "2017/02/13 15:45:30", //post  //ex:2017/02/13 15:45:30
+    TotalAmount: "100", //post  //總金額
+    TradeDesc: "測試交易描述", //post
+    ItemName: "測試商品等", //post
+    ReturnURL: "http://localhost:8001/api/auth/sucess",
+    OrderResultURL: "http://localhost:8001/api/auth/sucess",
+  };
+  const inv_params = {};
+  const options = require("../utils/ecpayConfig").options,
+    create = new ecpay_payment(options),
+    htm = create.payment_client.aio_check_out_all(base_param, inv_params);
+
+  res.send(htm);
 });
 
 // TODO 註冊會員
