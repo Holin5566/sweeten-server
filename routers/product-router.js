@@ -79,6 +79,19 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+// TODO 商品喜歡的 USER有哪些
+router.get("/comment/product/:id", async (req, res, next) => {
+  try {
+    let [product_comment] = await pool.execute(
+      "SELECT * FROM comment,user,product WHERE comment.user_id=user.id AND comment.product_id=product.id AND product_id = ?",
+      [req.params.id]
+    );
+    res.send(product_comment);
+  } catch (e) {
+    res.send(e);
+  }
+});
+
 router.get("/category/:categoryId", async (req, res, next) => {
   try {
     // 價格排序

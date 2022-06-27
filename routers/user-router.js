@@ -132,7 +132,7 @@ router.get("/favorite_product/:user_id", async (req, res, next) => {
   let offset = (page - 1) * perPage;
   // 5. 取得這一頁的資料
   let [readDataFavoriteProduct] = await pool.execute(
-    "SELECT * FROM favorit_product, product WHERE favorit_product.product_id=product.id AND user_id=? LIMIT ? OFFSET ?",
+    "SELECT * FROM favorit_product, product,comment WHERE favorit_product.product_id=product.id AND favorit_product.user_id=comment.user_id AND user_id=? LIMIT ? OFFSET ?",
     [req.params.user_id, perPage, offset]
   );
   res.json({

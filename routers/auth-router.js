@@ -48,11 +48,9 @@ router.post("/pay", async (req, res) => {
 
 //TODO 會員  CRUD
 //[完成] Read Product
-router.get("/:id", async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
-    let [auth] = await pool.execute("SELECT * FROM user WHERE id = ?", [
-      req.params.id,
-    ]);
+    let [auth] = await pool.execute("SELECT * FROM user ");
     res.send(auth);
   } catch (e) {
     res.send(e);
