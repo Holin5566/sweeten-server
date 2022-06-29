@@ -21,7 +21,8 @@ router.get("/", async (req, res, next) => {
     const page = req.query.page;
 
     // 取的所有資料筆數
-    const [order] = await pool.execute("SELECT * FROM order_info");
+    // const [order] = await pool.execute("SELECT * FROM order_info");
+    const [order] = await pool.execute("SELECT order_product.*, order_info.user_id, order_info.order_status_id, order_info.address, order_info.payment_id, order_info.timestamp FROM order_product, order_info WHERE order_info_id = order_info.id");
     const totalResults = order.length;
     // console.log(totalResults);
 
@@ -33,8 +34,16 @@ router.get("/", async (req, res, next) => {
     // 計算要跳過幾筆
     const offset = (page - 1) * perPage;
     // console.log(offset);
+    // const [pageResult] = await pool.execute(
+    //   "SELECT * FROM order_info ORDER BY timestamp DESC LIMIT ? OFFSET ?",
+    //   [perPage, offset]
+    // );
     const [pageResult] = await pool.execute(
-      "SELECT * FROM order_info ORDER BY timestamp DESC LIMIT ? OFFSET ?",
+      `SELECT order_product.*, order_info.user_id, order_info.order_status_id, order_info.address, order_info.payment_id, order_info.timestamp 
+      FROM order_product, order_info 
+      WHERE order_info_id = order_info.id 
+      ORDER BY timestamp DESC 
+      LIMIT ? OFFSET ?`,
       [perPage, offset]
     );
 
@@ -56,6 +65,8 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+// FIXME order 要修正 sql 語法
+
 // [完成] Read order (個人所有訂單)
 router.get("/user/:user_id", async (req, res, next) => {
   const { user_id } = req.params;
@@ -67,12 +78,18 @@ router.get("/user/:user_id", async (req, res, next) => {
     // );
 
     // 取得目前在第幾頁
-    const page = req.query.page;
+    const page = req.query.page || 1;
     // console.log(page)
 
     // 取得總資料筆數
+    // const [personalOrder] = await pool.execute(
+    //   "SELECT * FROM order_info WHERE user_id = ?",
+    //   [user_id]
+    // );
     const [personalOrder] = await pool.execute(
-      "SELECT * FROM order_info WHERE user_id = ?",
+      `SELECT order_product.*, order_info.user_id, order_info.order_status_id, order_info.address, order_info.payment_id, order_info.timestamp 
+      FROM order_product, order_info 
+      WHERE order_info_id = order_info.id AND user_id = ?`,
       [user_id]
     );
     const totalResults = personalOrder.length;
@@ -88,8 +105,16 @@ router.get("/user/:user_id", async (req, res, next) => {
     // console.log(offset);
 
     // 取得這一頁的資料
+    // const [pageResult] = await pool.execute(
+    //   "SELECT * FROM order_info WHERE user_id = ? ORDER BY timestamp DESC LIMIT ? OFFSET ?",
+    //   [user_id, perPage, offset]
+    // );
     const [pageResult] = await pool.execute(
-      "SELECT * FROM order_info WHERE user_id = ? ORDER BY timestamp DESC LIMIT ? OFFSET ?",
+      `SELECT order_product.*, order_info.user_id, order_info.order_status_id, order_info.address, order_info.payment_id, order_info.timestamp 
+      FROM order_product, order_info 
+      WHERE order_info_id = order_info.id AND user_id = ? 
+      ORDER BY timestamp DESC 
+      LIMIT ? OFFSET ?`,
       [user_id, perPage, offset]
     );
 
@@ -115,8 +140,14 @@ router.get("/user/:user_id", async (req, res, next) => {
 router.get("/:id", async (req, res, next) => {
   const { id } = req.params;
   try {
+    // const [order] = await pool.execute(
+    //   "SELECT * FROM order_info WHERE id = ?",
+    //   [id]
+    // );
     const [order] = await pool.execute(
-      "SELECT * FROM order_info WHERE id = ?",
+      `SELECT order_product.*, order_info.user_id, order_info.order_status_id, order_info.address, order_info.payment_id, order_info.timestamp 
+      FROM order_product, order_info 
+      WHERE order_info_id = order_info.id AND order_info.id = ?`,
       [id]
     );
     res.send(order);

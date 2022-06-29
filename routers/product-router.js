@@ -154,7 +154,6 @@ router.get("/:id", async (req, res, next) => {
     res.send(e);
   }
 });
-//0
 
 // [完成] Create Product
 router.post("/", async (req, res, next) => {
@@ -164,8 +163,8 @@ router.post("/", async (req, res, next) => {
 
   let [insertData] = await pool.execute(
     // query excute 差異
-    "INSERT INTO product ( name, price, description, express_id, created_at) VALUES ( ?, ?, ?, ?, ?)",
-    [name, price, description, express_id, created_at]
+    "INSERT INTO product ( name, price, description, express_id, created_at, valid) VALUES ( ?, ?, ?, ?, ?, ?)",
+    [name, price, description, express_id, created_at, 1]
   );
   console.log("New Product Data: ", insertData); // insertedData 是甚麼，為甚麼不是存入的資料
   res.send("Thanks for poasting.");

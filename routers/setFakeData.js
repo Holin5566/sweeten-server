@@ -7,6 +7,11 @@ const {
   lessons,
   likedLesson,
   likedProduct,
+  payment,
+  orderStatus,
+  order_info,
+  coupons,
+  orderProduct,
 } = require("./fakeData");
 
 const express = require("express");
@@ -109,7 +114,7 @@ router.post("/product", (req, res, next) => {
   try {
     products.map(async (product) => {
       const [setProducts] = await pool.execute(
-        "INSERT INTO product (id, name, price, description, express_id, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT INTO product (id, name, price, description, express_id, created_at, valid) VALUES (?, ?, ?, ?, ?, ?, ?)",
         [
           product.id,
           product.name,
@@ -117,6 +122,7 @@ router.post("/product", (req, res, next) => {
           product.description,
           product.express_id,
           product.created_at,
+          product.valid,
         ]
       );
     });
@@ -173,6 +179,103 @@ router.post("/favoriteProduct", (req, res, next) => {
       );
     });
     res.send("新增 商品收藏 資料成功");
+  } catch (e) {
+    res.send(e);
+  }
+});
+
+// payment
+router.post("/payment", (req, res, next) => {
+  try {
+    payment.map(async (eachPayment) => {
+      const [setpayment] = await pool.execute(
+        "INSERT INTO payment (id, name) VALUES (?, ?)",
+        [eachPayment.id, eachPayment.name]
+      );
+    });
+    res.send("新增 付款方式 成功");
+  } catch (e) {
+    res.send(e);
+  }
+});
+
+// orderStatus
+router.post("/orderStatus", (req, res, next) => {
+  try {
+    orderStatus.map(async (status) => {
+      const [setStatus] = await pool.execute(
+        "INSERT INTO order_status (id, name) VALUES (?, ?)",
+        [status.id, status.name]
+      );
+    });
+    res.send("新增 配送狀態 成功");
+  } catch (e) {
+    res.send(e);
+  }
+});
+
+// order info
+router.post("/orderInfo", (req, res, next) => {
+  try {
+    order_info.map(async (orderInfo) => {
+      const [setOrderInfo] = await pool.execute(
+        "INSERT INTO order_info (id, user_id, order_status_id, address, payment_id, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+        [
+          orderInfo.id,
+          orderInfo.user_id,
+          orderInfo.order_status_id,
+          orderInfo.address,
+          orderInfo.payment_id,
+          orderInfo.timestamp,
+        ]
+      );
+    });
+    res.send("新增 訂單資料 成功");
+  } catch (e) {
+    res.send(e);
+  }
+});
+
+// coupon
+router.post("/coupon", (req, res, next) => {
+  try {
+    coupons.map(async (coupon) => {
+      const [setCoupon] = await pool.execute(
+        "INSERT INTO coupon (id, name, code, discount, start_date, end_date, limited) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [
+          coupon.id,
+          coupon.name,
+          coupon.code,
+          coupon.discount,
+          coupon.start_date,
+          coupon.end_date,
+          coupon.limited,
+        ]
+      );
+    });
+    res.send("新增 coupon 成功");
+  } catch (e) {
+    res.send(e);
+  }
+});
+
+// order product
+router.post("/orderProduct", (req, res, next) => {
+  try {
+    orderProduct.map(async (eachOrderProduct) => {
+      const [setOrderProduct] = await pool.execute(
+        "INSERT INTO order_product (id, order_info_id, product_id, coupon_id, memo, price) VALUES (?, ?, ?, ?, ?, ?)",
+        [
+          eachOrderProduct.id,
+          eachOrderProduct.order_info_id,
+          eachOrderProduct.product_id,
+          eachOrderProduct.coupon_id,
+          eachOrderProduct.memo,
+          eachOrderProduct.price,
+        ]
+      );
+    });
+    res.send("新增 訂單商品(orderProduct) 成功");
   } catch (e) {
     res.send(e);
   }
