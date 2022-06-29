@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 // const argon2 = require("argon2");
 const pool = require("../utils/dbConnect");
-// const { response } = require("express");
 require("dotenv").config();
 
 router.use((req, res, next) => {
@@ -36,26 +35,69 @@ router.post("/pay", async (req, res) => {
   res.send(htm);
 });
 
-// TODO 註冊會員
-// router.get("/signup", async (req, res) => {
-//   try {
-//     const hash = await argon2.hash("password");
-//     res.send(hash);
-//   } catch {
-//     (e) => res.send(e);
-//   }
-// });
-
-//TODO 會員  CRUD
-//[完成] Read Product
-router.get("/:id", async (req, res, next) => {
+/* ------------------------------  NOTE 註冊會員 ------------------------------ */
+// {name: "test", email: "testtest@gmail.com", password: "testtest"}
+router.post("/email", async (req, res) => {
+  const { name, email, phone, password } = req.body;
   try {
-    let [auth] = await pool.execute("SELECT * FROM user WHERE id = ?", [
-      req.params.id,
-    ]);
-    res.send(auth);
+    // 驗證重複
+    const sql = "SELECT * FROM user WHERE email=?",
+      [queryEmail] = await pool.execute(sql, [email]);
+    if (queryEmail.length > 0) throw "帳號重複";
+
+    // 雜湊並儲存
+    const hash = await argon2.hash(password);
+    await pool.execute(
+      "INSERT INTO user (email, password, phone, full_name) VALUES (?, ?, ?, ?)",
+      [email, hash, phone, name]
+    );
+
+    res.send(email + " 註冊成功");
   } catch (e) {
-    res.send(e);
+    console.log(e);
+    res.status(404).send("註冊失敗");
+  }
+});
+
+/* ---------------------------------- NOTE 登入會員 --------------------------------- */
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    // // 確認用戶存在
+    const sql = "SELECT * FROM `user` WHERE `user`.`email` = ? ";
+    const [data] = await pool.execute(sql, [email]);
+    if (data.length < 1) throw "用戶不存在";
+    const user = data[0];
+    console.log(user);
+    // 驗證密碼
+    const passwordVerify = await argon2.verify(user.password, password);
+    if (!passwordVerify) throw "密碼驗證失敗";
+
+    // make session
+    const currentUser = {
+      email: user.email,
+      birthday: user.birthday,
+      create_at: user.create_at,
+      phone: user.phone,
+      user_photo_id: user.user_photo_id,
+    };
+    req.session.user = currentUser;
+    res.send(currentUser);
+  } catch (err) {
+    res.status(404).send(err);
+  }
+});
+
+/* ---------------------------- get user by email --------------------------- */
+router.get("/:email", async (req, res, next) => {
+  const { email } = req.params;
+  try {
+    let [auth] = await pool.execute("SELECT * FROM user WHERE email = ?", [
+      email,
+    ]);
+    res.send(auth[0]);
+  } catch (e) {
+    res.status(404).send(e);
   }
 });
 
