@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const passport = require("passport");
 const {
   authRouter,
   userRouter,
@@ -40,8 +41,16 @@ app.use(express.json());
 // NOTE 啟用 session
 const expressSession = require("express-session");
 app.use(
-  expressSession({ secret: "test", resave: false, saveUninitialized: false })
+  expressSession({ secret: "test", resave: false, saveUninitialized: true })
 );
+// const cookieSession = require("cookie-session");
+// app.use(
+//   cookieSession({
+//     keys: ["secret"],
+//   })
+// );
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.get("/", (req, res) => {
   console.log("open server");

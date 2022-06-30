@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 // const argon2 = require("argon2");
 const pool = require("../utils/dbConnect");
+const passport = require("../utils/passport");
 require("dotenv").config();
 
 router.use((req, res, next) => {
@@ -57,6 +58,28 @@ router.post("/email", async (req, res) => {
     console.log(e);
     res.status(404).send("註冊失敗");
   }
+});
+/* ------------------------------- google auth ------------------------------ */
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/api/auth/check" }),
+  async (req, res) => {
+    console.log(req.body);
+    console.log(req.query);
+    console.log(req.params);
+    // Successful authentication, redirect home.
+    res.redirect("http://localhost:3000/");
+  }
+);
+
+// FIXME isAuthenticated 是 false
+router.get("/check", (req, res) => {
+  console.log(req.isAuthenticated());
+  res.send(req.isAuthenticated());
 });
 
 /* ---------------------------------- NOTE 登入會員 --------------------------------- */
