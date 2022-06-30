@@ -189,7 +189,7 @@ router.get("/favorite_product/all_data/:user_id", async (req, res, next) => {
   res.send(readDataFavoriteProduct);
 });
 
-// TODO 喜好商品 DELETE
+// TODO 喜好商品 DELETE.
 router.delete("/favorite_product/:id", async (req, res, next) => {
   let { id } = req.params;
   let { product_id } = req.body;
