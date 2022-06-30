@@ -46,7 +46,7 @@ router.get("/comment/:user_id", async (req, res, next) => {
   // console.log(allResults);
   const total = allResults.length;
   // 3. 計算總共有幾頁
-  const perPage = 2;
+  const perPage = 3;
   const lastPage = Math.ceil(total / perPage);
   // 4. 計算 offect 是多少(計算要跳過幾筆)
   let offect = (page - 1) * perPage;
@@ -161,7 +161,7 @@ router.get("/favorite_product/:user_id", async (req, res, next) => {
   );
   const total = allResults.length;
   // 3. 計算總空有幾頁
-  const perPage = 2;
+  const perPage = 3;
   const totalPage = Math.ceil(total / perPage);
   // 4. 計算offect 是多少(計算要跳過幾筆)
   let offset = (page - 1) * perPage;

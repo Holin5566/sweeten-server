@@ -15,6 +15,69 @@ router.use((req, res, next) => {
 
 // TODO 商品 CRUD
 // [完成] Read Product (所有產品)
+router.get("/", async (req, res, next) => {
+  try {
+    // 沒有頁碼的情況
+    // let [products] = await pool.execute("SELECT * FROM product");
+
+    // 篩選
+    // [價格] ASC DESC
+    let priceOrder = req.query.priceOrder;
+    // console.log(priceOrder);
+
+    if (priceOrder == "2") {
+      orderByPrice = "DESC";
+      // console.log(orderByPrice);
+    } else {
+      orderByPrice = "ASC";
+      // console.log(orderByPrice);
+    }
+
+    // 頁碼
+    // 過濾參數用 query string 來傳遞
+    // 取得目前在第幾頁，而且利用 || 這個特性來做預設值
+    // console.log(req.query.page)   // 如果網址上沒有 page 這個 query string，那 req.query.page 會是 undefined(false)
+    let page = req.query.page || 1;
+    // console.log("current page: ", page);
+
+    // 取得目前的總筆數
+    let [products] = await pool.execute("SELECT * FROM product");
+    const totalRecords = products.length;
+    // console.log("total records: ", totalRecords);
+
+    // 計算總共有幾頁
+    let perPage = 12;
+    let totalPage = Math.ceil(totalRecords / perPage);
+    // console.log("total page: ", totalPage);
+
+    // 計算 offset 是多少(計算要跳過幾筆)
+    let offset = (page - 1) * perPage;
+    // console.log("offset: ", offset);
+
+    // 取得這一頁的資料 select * ... limit ? offset ?
+    let [pageResult] = await pool.execute(
+      `SELECT * FROM product ORDER BY price ${orderByPrice} LIMIT ? OFFSET ?`,
+      [perPage, offset]
+    );
+    // console.log(pageResult)
+
+    // 回覆給前端
+    if (pageResult.length === 0) {
+      res.status(404).json(pageResult);
+    } else {
+      res.json({
+        pagination: {
+          totalRecords,
+          totalPage,
+          page,
+        },
+        data: pageResult,
+      });
+    }
+  } catch (e) {
+    res.send(e);
+  }
+});
 
 // TODO 商品喜歡的 USER有哪些
 router.get("/comment/product/:id", async (req, res, next) => {
@@ -262,7 +325,7 @@ router.get("/", async (req, res, next) => {
     // console.log("total records: ", totalRecords);
 
     // 計算總共有幾頁
-    let perPage = 10;
+    let perPage = 12;
     let totalPage = Math.ceil(totalRecords / perPage);
     // console.log("total page: ", totalPage);
 
@@ -306,7 +369,6 @@ router.get("/:id", async (req, res, next) => {
     res.send(e);
   }
 });
-//0
 
 // [完成] Create Product
 router.post("/", async (req, res, next) => {
@@ -316,8 +378,8 @@ router.post("/", async (req, res, next) => {
 
   let [insertData] = await pool.execute(
     // query excute 差異
-    "INSERT INTO product ( name, price, description, express_id, created_at) VALUES ( ?, ?, ?, ?, ?)",
-    [name, price, description, express_id, created_at]
+    "INSERT INTO product ( name, price, description, express_id, created_at, valid) VALUES ( ?, ?, ?, ?, ?, ?)",
+    [name, price, description, express_id, created_at, 1]
   );
   console.log("New Product Data: ", insertData); // insertedData 是甚麼，為甚麼不是存入的資料
   res.send("Thanks for poasting.");
