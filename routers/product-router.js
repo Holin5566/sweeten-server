@@ -3,6 +3,9 @@ const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const { empty } = require("uuidv4");
 
+// NOTE 上傳圖片
+const uploader = require("../utils/uploader");
+
 require("dotenv").config();
 
 // 專案建立的資料庫模組
@@ -14,7 +17,7 @@ router.use((req, res, next) => {
 });
 
 // TODO 商品 CRUD
-// [完成] Read Product (所有產品)
+// [完成] Read Product (所有產品 valid = 1)
 router.get("/", async (req, res, next) => {
   try {
     // 沒有頁碼的情況
@@ -41,7 +44,10 @@ router.get("/", async (req, res, next) => {
     // console.log("current page: ", page);
 
     // 取得目前的總筆數
-    let [products] = await pool.execute("SELECT * FROM product");
+    let [products] = await pool.execute(
+      "SELECT * FROM product WHERE valid = ?",
+      [1]
+    );
     const totalRecords = products.length;
     // console.log("total records: ", totalRecords);
 
@@ -56,8 +62,8 @@ router.get("/", async (req, res, next) => {
 
     // 取得這一頁的資料 select * ... limit ? offset ?
     let [pageResult] = await pool.execute(
-      `SELECT * FROM product ORDER BY price ${orderByPrice} LIMIT ? OFFSET ?`,
-      [perPage, offset]
+      `SELECT * FROM product WHERE valid = ? ORDER BY price ${orderByPrice} LIMIT ? OFFSET ?`,
+      [1, perPage, offset]
     );
     // console.log(pageResult)
 
@@ -79,6 +85,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+// [完成] Read Product by category id (分類的產品 + valid = 1)
 router.get("/category/:categoryId", async (req, res, next) => {
   try {
     // 價格排序
@@ -99,8 +106,8 @@ router.get("/category/:categoryId", async (req, res, next) => {
     const [product] = await pool.execute(
       `SELECT product.name AS product, product.price, product.description, product.express_id, category.name AS category 
       FROM product, product_category, category 
-      WHERE product_category.product_id = product.id AND product_category.category_id = category.id AND category.id = ?`,
-      [categoryId]
+      WHERE product.valid = ? AND product_category.product_id = product.id AND product_category.category_id = category.id AND category.id = ?`,
+      [1, categoryId]
     );
     const totalResults = product.length;
 
@@ -117,11 +124,11 @@ router.get("/category/:categoryId", async (req, res, next) => {
     const [pageResult] = await pool.execute(
       `SELECT product.name AS product, product.price, product.description, product.express_id, category.name AS category 
       FROM product, product_category, category 
-      WHERE product_category.product_id = product.id AND product_category.category_id = category.id AND category.id = ?
+      WHERE product.valid = ? AND product_category.product_id = product.id AND product_category.category_id = category.id AND category.id = ?
       ORDER BY price ${orderByPrice}
       LIMIT ?
       OFFSET ?`,
-      [categoryId, perPage, offset]
+      [1, categoryId, perPage, offset]
     );
 
     // 回覆給前端
@@ -142,12 +149,26 @@ router.get("/category/:categoryId", async (req, res, next) => {
   }
 });
 
+// [完成] Read Product (所有產品 valid = 0)
+router.get("/discontinued", async (req, res, next) => {
+  try {
+    let [productDiscontinued] = await pool.execute(
+      "SELECT * FROM product WHERE valid = 0"
+    );
+
+    res.send(productDiscontinued);
+  } catch (e) {
+    res.send(e);
+  }
+});
+
 // [完成] Read Product (個別產品)
 router.get("/:id", async (req, res, next) => {
   try {
-    let [product] = await pool.execute("SELECT * FROM product WHERE id = ?", [
-      req.params.id,
-    ]);
+    let [product] = await pool.execute(
+      "SELECT * FROM product WHERE valid = ? AND id = ?",
+      [1, req.params.id]
+    );
 
     res.send(product);
   } catch (e) {
@@ -166,6 +187,12 @@ router.post("/", async (req, res, next) => {
     "INSERT INTO product ( name, price, description, express_id, created_at, valid) VALUES ( ?, ?, ?, ?, ?, ?)",
     [name, price, description, express_id, created_at, 1]
   );
+
+  let [insertImg] = await pool.execute(
+    "INSERT INTO product_photo (id, name, path) VALUES (?, ?, ?)",
+    [insertData.insertId, , path]
+  );
+
   console.log("New Product Data: ", insertData); // insertedData 是甚麼，為甚麼不是存入的資料
   res.send("Thanks for poasting.");
 });
@@ -315,11 +342,16 @@ router.delete("/comment/:id", async (req, res, next) => {
 });
 
 // NOTE 上傳圖片
-const uploader = require("../utils/uploader");
+// const uploader = require("../utils/uploader");
 
 // upload.single("photo") -> 抓取 key = photo 的資料, 存入 storage
 router.post("/photo", uploader.single("photo"), (req, res) => {
+  const { imgFile } = req.body;
+  console.log(imgFile)
+
   res.send(req.file);
+
+  // console.log(file.originalname.split(".").pop());
 });
 
 module.exports = router;
