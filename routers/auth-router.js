@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-// const argon2 = require("argon2");
+const argon2 = require("argon2");
 const pool = require("../utils/dbConnect");
 const passport = require("../utils/passport");
 require("dotenv").config();
@@ -98,6 +98,7 @@ router.post("/login", async (req, res) => {
 
     // make session
     const currentUser = {
+      id: user.id,
       email: user.email,
       birthday: user.birthday,
       create_at: user.create_at,
