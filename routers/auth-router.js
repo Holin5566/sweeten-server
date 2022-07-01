@@ -3,6 +3,7 @@ const router = express.Router();
 const argon2 = require("argon2");
 const pool = require("../utils/dbConnect");
 const passport = require("../utils/passport");
+const validate = require("express-validation");
 require("dotenv").config();
 
 router.use((req, res, next) => {
