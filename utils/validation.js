@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-export default {
+export default Joi.object({
   /* ------------------------- POST /api/auth/login ------------------------ */
   userLogin: {
     body: {
@@ -23,4 +23,4 @@ export default {
         .required(), // 字串+手機格式+必填
     },
   },
-};
+});
