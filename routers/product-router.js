@@ -178,19 +178,15 @@ router.get("/:id", async (req, res, next) => {
 
 // [完成] Create Product
 router.post("/", async (req, res, next) => {
-  // let id = uuidv4(); // 好像有 auto increment 還要用 uuid 嗎
+  let id = () => +new Date();
   let created_at = new Date();
   let { name, price, description, express_id } = req.body;
 
+  // 產品資料 sql
   let [insertData] = await pool.execute(
     // query excute 差異
-    "INSERT INTO product ( name, price, description, express_id, created_at, valid) VALUES ( ?, ?, ?, ?, ?, ?)",
-    [name, price, description, express_id, created_at, 1]
-  );
-
-  let [insertImg] = await pool.execute(
-    "INSERT INTO product_photo (id, name, path) VALUES (?, ?, ?)",
-    [insertData.insertId, , path]
+    "INSERT INTO product (id, name, price, description, express_id, created_at, valid) VALUES ( ?, ?, ?, ?, ?, ?, ?)",
+    [id(), name, price, description, express_id, created_at, 1]
   );
 
   console.log("New Product Data: ", insertData); // insertedData 是甚麼，為甚麼不是存入的資料
@@ -345,13 +341,18 @@ router.delete("/comment/:id", async (req, res, next) => {
 // const uploader = require("../utils/uploader");
 
 // upload.single("photo") -> 抓取 key = photo 的資料, 存入 storage
-router.post("/photo", uploader.single("photo"), (req, res) => {
-  const { imgFile } = req.body;
-  console.log(imgFile)
+router.post("/photo", uploader.single("photo"), async (req, res) => {
+
+  let productId = () => +new Date();
+  const photoName = req.file.originalname.split(".").slice(-2, -1)[0];
+  const path = req.file.path;
+
+  let [insertImg] = await pool.execute(
+    "INSERT INTO product_photo (product_id, name, path) VALUES (?, ?, ?)",
+    [productId(), photoName, path]
+  );
 
   res.send(req.file);
-
-  // console.log(file.originalname.split(".").pop());
 });
 
 module.exports = router;
