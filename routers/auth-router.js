@@ -3,7 +3,7 @@ const router = express.Router();
 const argon2 = require("argon2");
 const pool = require("../utils/dbConnect");
 const passport = require("../utils/passport");
-const validate = require("express-validation");
+const validate = require("../utils/validation");
 require("dotenv").config();
 
 router.use((req, res, next) => {
@@ -40,8 +40,11 @@ router.post("/pay", async (req, res) => {
 /* ------------------------------  NOTE 註冊會員 ------------------------------ */
 // {name: "test", email: "testtest@gmail.com", password: "testtest"}
 router.post("/email", async (req, res) => {
-  const { name, email, phone, password } = req.body;
+  const { error, msg } = validate.signup(req.body);
+  if (error) return res.status(404).send(msg);
+
   try {
+    const { name, email, phone, password } = req.body;
     // 驗證重複
     const sql = "SELECT * FROM user WHERE email=?",
       [queryEmail] = await pool.execute(sql, [email]);
@@ -84,16 +87,17 @@ router.get("/check", (req, res) => {
 });
 
 /* ---------------------------------- NOTE 登入會員 --------------------------------- */
-const userLogin = require("../utils/validation").userLogin;
-router.post("/login", validate(userLogin), async (req, res) => {
-  const { email, password } = req.body;
+router.post("/login", async (req, res) => {
+  const { error, msg } = validate.login(req.body);
+  if (error) return res.status(404).send(msg);
+
   try {
+    const { email, password } = req.body;
     // // 確認用戶存在
     const sql = "SELECT * FROM `user` WHERE `user`.`email` = ? ";
     const [data] = await pool.execute(sql, [email]);
     if (data.length < 1) throw "用戶不存在";
     const user = data[0];
-    console.log(user);
     // 驗證密碼
     const passwordVerify = await argon2.verify(user.password, password);
     if (!passwordVerify) throw "密碼驗證失敗";
