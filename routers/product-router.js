@@ -18,6 +18,44 @@ router.use((req, res, next) => {
 
 // TODO 商品 CRUD
 // [完成] Read Product (所有產品 valid = 1)
+router.get("/all", async (req, res, next) => {
+  try {
+    // 沒有頁碼的情況
+    // let [products] = await pool.execute("SELECT * FROM product");
+
+    // 篩選
+    // [價格] ASC DESC
+    let priceOrder = req.query.priceOrder;
+    // console.log(priceOrder);
+
+    if (priceOrder == "2") {
+      orderByPrice = "DESC";
+      // console.log(orderByPrice);
+    } else {
+      orderByPrice = "ASC";
+      // console.log(orderByPrice);
+    }
+
+    // 取得目前的總筆數
+    let [products] = await pool.execute(
+      `SELECT * FROM product WHERE valid = ? ORDER BY price ${orderByPrice}`,
+      [1]
+    );
+
+    // 回覆給前端
+    if (products.length === 0) {
+      res.status(404).json(products);
+    } else {
+      res.json({
+        data: products,
+      });
+    }
+  } catch (e) {
+    res.send(e);
+  }
+});
+
+// [完成] Read Product (所有產品 valid = 1)
 router.get("/", async (req, res, next) => {
   try {
     // 沒有頁碼的情況
@@ -162,11 +200,15 @@ router.get("/discontinued", async (req, res, next) => {
   }
 });
 
-// [完成] Read Product (個別產品)
+/* ---------------------------- [完成] Read Product (個別產品) ---------------------------- */
 router.get("/:id", async (req, res, next) => {
   try {
+    // let [product] = await pool.execute(
+    //   "SELECT * FROM product WHERE valid = ? AND id = ?",
+    //   [1, req.params.id]
+    // );
     let [product] = await pool.execute(
-      "SELECT * FROM product WHERE valid = ? AND id = ?",
+      "SELECT product_photo.name AS img_name, product_photo.path, product.* FROM product_photo, product product.id = ? AND valid = ?",
       [1, req.params.id]
     );
 
@@ -176,20 +218,20 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-// [完成] Create Product
+/* ------------------------- // [完成] Create Product (沒有圖片) ------------------------- */
 router.post("/", async (req, res, next) => {
-  let id = () => +new Date();
+  // let id = () => String(+new Date()).slice(0, 10);
   let created_at = new Date();
-  let { name, price, description, express_id } = req.body;
-
+  let { id, name, price, description, express_id } = req.body;
+  console.log(req.body);
   // 產品資料 sql
   let [insertData] = await pool.execute(
     // query excute 差異
     "INSERT INTO product (id, name, price, description, express_id, created_at, valid) VALUES ( ?, ?, ?, ?, ?, ?, ?)",
-    [id(), name, price, description, express_id, created_at, 1]
+    [id, name, price, description, express_id, created_at, 1]
   );
-
   console.log("New Product Data: ", insertData); // insertedData 是甚麼，為甚麼不是存入的資料
+
   res.send("Thanks for poasting.");
 });
 
@@ -337,21 +379,33 @@ router.delete("/comment/:id", async (req, res, next) => {
   res.send("The comment has been deleted.");
 });
 
-// NOTE 上傳圖片
+/* -------------------------------- NOTE 上傳圖片 + product info ------------------------------- */
 // const uploader = require("../utils/uploader");
 
 // upload.single("photo") -> 抓取 key = photo 的資料, 存入 storage
 router.post("/photo", uploader.single("photo"), async (req, res) => {
+  // console.log(req.file);
+  let { id } = req.body;
+  let created_at = new Date();
+  // console.log(req.body);
 
-  let productId = () => +new Date();
+  // let productId = () => String(+new Date()).slice(0, 10);
   const photoName = req.file.originalname.split(".").slice(-2, -1)[0];
   const path = req.file.path;
+  let { name, price, description, express_id } = req.body;
 
-  let [insertImg] = await pool.execute(
-    "INSERT INTO product_photo (product_id, name, path) VALUES (?, ?, ?)",
-    [productId(), photoName, path]
+  // 產品資料 sql
+  let [insertData] = await pool.execute(
+    // query excute 差異
+    "INSERT INTO product (id, name, price, description, express_id, created_at, valid) VALUES ( ?, ?, ?, ?, ?, ?, ?)",
+    [id, name, price, description, express_id, created_at, 1]
   );
 
+  // 產品圖片 sql
+  let [insertImg] = await pool.execute(
+    "INSERT INTO product_photo (product_id, name, path) VALUES (?, ?, ?)",
+    [id, photoName, path]
+  );
   res.send(req.file);
 });
 
