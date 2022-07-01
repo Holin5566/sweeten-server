@@ -3,7 +3,7 @@ const router = express.Router();
 const argon2 = require("argon2");
 const pool = require("../utils/dbConnect");
 const passport = require("../utils/passport");
-const validate = require("../utils/validation");
+const validate = require("express-validation");
 require("dotenv").config();
 
 router.use((req, res, next) => {
@@ -84,7 +84,8 @@ router.get("/check", (req, res) => {
 });
 
 /* ---------------------------------- NOTE 登入會員 --------------------------------- */
-router.post("/login", async (req, res) => {
+const userLogin = require("../utils/validation").userLogin;
+router.post("/login", validate(userLogin), async (req, res) => {
   const { email, password } = req.body;
   try {
     // // 確認用戶存在
