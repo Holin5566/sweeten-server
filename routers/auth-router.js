@@ -46,17 +46,6 @@ router.post("/pay", async (req, res) => {
 //   }
 // });
 
-//TODO 會員  CRUD
-//[完成] Read Product
-router.get("/", async (req, res, next) => {
-  try {
-    let [auth] = await pool.execute("SELECT * FROM user ");
-    res.send(auth);
-  } catch (e) {
-    res.send(e);
-  }
-});
-
 //TODO 會員 製作身分驗證
 //[完成] CREATE
 router.post("/", async (req, res, next) => {

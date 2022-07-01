@@ -192,7 +192,7 @@ router.get("/favorite_product/all_data/:user_id", async (req, res, next) => {
 // TODO 喜好商品 DELETE.
 router.delete("/favorite_product/:id", async (req, res, next) => {
   let { id } = req.params;
-  let { product_id } = req.body;
+  let { product_id } = req.query;
   let [deleteData] = await pool.execute(
     "DELETE FROM favorit_product WHERE user_id = ? AND product_id =?",
     [id, product_id]
@@ -208,6 +208,59 @@ router.post("/favorite_product", async (req, res, next) => {
     [user_id, product_id]
   );
   res.send(`會員 ${user_id} 您的喜愛商品 ${product_id} 已經更新囉`);
+});
+
+//TODO 會員  CRUD
+//[完成] Read 會員資料
+router.get("/:id", async (req, res, next) => {
+  let { id } = req.params;
+  try {
+    let [userData] = await pool.execute("SELECT * FROM user WHERE id=?", [id]);
+    res.send(userData);
+  } catch (e) {
+    res.send(e);
+  }
+});
+
+// TODO
+router.patch("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  const newData = req.body;
+  //設定Sql 語法
+  const preDataSql = "SELECT * FROM user WHERE id = ?";
+  const [preData] = await pool.execute(preDataSql, [id]);
+  //設定更改前資料
+  const preFullName = preData[0].full_name;
+  const preEmail = preData[0].email;
+  const prePassword = preData[0].password;
+  const preBirthday = preData[0].birthday;
+  const preGender = preData[0].gender_id;
+  const preCountry = preData[0].country_id;
+  const prePhone = preData[0].phone;
+  //
+  let sql = "";
+  let sqlPreparedArr = [];
+  //
+  for (let key in preData[0]) {
+    if (newData[key]) {
+      sql += key + " = ?, ";
+      sqlPreparedArr.push(newData[key]);
+    }
+  }
+  // 處理最後的、完整的，要執行 update 的 sql 語法
+  sql = "UPDATE user SET " + sql.slice(0, -2) + " WHERE id = ?";
+  // console.log(sql);  // UPDATE product SET name= ?, price= ?, description= ?, express_id= ?, WHERE id = ?
+
+  // 處理最後的、完整的，要執行 update 的 sql 語法的 prepare statemwnt array
+  sqlPreparedArr.push(`${id}`);
+
+  try {
+    let [updateData] = await pool.execute(sql, sqlPreparedArr);
+    res.send(`user ${id} hs already been updated.`);
+  } catch (e) {
+    res.status(404);
+    res.send(e);
+  }
 });
 
 // TODO 會員課程
