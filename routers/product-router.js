@@ -119,7 +119,11 @@ router.get("/", async (req, res, next) => {
     res.send(e);
   }
 });
-
+router.get("/all_data", async (req, res, next) => {
+  let [data] = await pool.execute("SELECT * FROM expriy");
+  console.log(data);
+  res.send(data);
+});
 // TODO 商品喜歡的 USER有哪些
 router.get("/comment/product/:id", async (req, res, next) => {
   try {
@@ -387,7 +391,12 @@ router.delete("/comment/:id", async (req, res, next) => {
   console.log("Deleted Data: ", deletedProductComment);
   res.send("The comment has been deleted.");
 });
-
+//test read所有商品
+// router.get("/all_data", async (req, res, next) => {
+//   let [data] = await pool.execute("SELECT * FROM expriy");
+//   console.log(data);
+//   res.send(data);
+// });
 // TODO 即期品 Read
 router.get("/expire_product", async (req, res, next) => {
   try {
@@ -411,12 +420,13 @@ router.get("/expire_product", async (req, res, next) => {
     // console.log("current page: ", page);
 
     // 取得目前的總筆數
-    let [expireProducts] = await pool.execute("SELECT * FROM expire_product");
+    let [expireProducts] = await pool.execute("SELECT * FROM expriy");
     const totalRecords = expireProducts.length;
+    console.log(totalRecords);
     // console.log("total records: ", totalRecords);
 
     // 計算總共有幾頁
-    let perPage = 4;
+    let perPage = 1;
     let totalPage = Math.ceil(totalRecords / perPage);
     // console.log("total page: ", totalPage);
 
@@ -426,10 +436,10 @@ router.get("/expire_product", async (req, res, next) => {
 
     // 取得這一頁的資料 select * ... limit ? offset ?
     let [pageResult] = await pool.execute(
-      `SELECT name, price,expire_product.id,count,expire_product.expire_time FROM product, expire_product WHERE expire_product.product_id=product.id  LIMIT ? OFFSET ?`,
+      `SELECT name, price,expriy.id,count,expriy.expriy_date FROM product, expriy WHERE expriy.product_id=product.id LIMIT ? OFFSET ?`,
       [perPage, offset]
     );
-    // console.log(pageResult)
+    console.log(pageResult);
 
     // 回覆給前端
     if (pageResult.length === 0) {
