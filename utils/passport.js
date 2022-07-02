@@ -47,8 +47,9 @@ passport.use(
         hasCreated = searchEmail.length > 0;
       if (!hasCreated) {
         // not fount -> create user -> done(null,user)
-        sql = "INSERT INTO user (email, password, full_name) VALUES (?, ?, ?)";
-        await pool.execute(sql, [user.email, uuidv4(), user.name]);
+        sql =
+          "INSERT INTO user (email, password, full_name,id) VALUES (?, ?, ?, ?)";
+        await pool.execute(sql, [user.email, uuidv4(), user.name, user.id]);
       }
 
       done(null, user); // 設定 session
