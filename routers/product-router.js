@@ -3,9 +3,6 @@ const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const { empty } = require("uuidv4");
 
-// NOTE 上傳圖片
-const uploader = require("../utils/uploader");
-
 require("dotenv").config();
 
 // 專案建立的資料庫模組
@@ -90,7 +87,7 @@ router.get("/", async (req, res, next) => {
     // console.log("total records: ", totalRecords);
 
     // 計算總共有幾頁
-    let perPage = 10;
+    let perPage = 12;
     let totalPage = Math.ceil(totalRecords / perPage);
     // console.log("total page: ", totalPage);
 
@@ -123,7 +120,19 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// [完成] Read Product by category id (分類的產品 + valid = 1)
+// TODO 商品喜歡的 USER有哪些
+router.get("/comment/product/:id", async (req, res, next) => {
+  try {
+    let [product_comment] = await pool.execute(
+      "SELECT * FROM comment,user,product WHERE comment.user_id=user.id AND comment.product_id=product.id AND product_id = ?",
+      [req.params.id]
+    );
+    res.send(product_comment);
+  } catch (e) {
+    res.send(e);
+  }
+});
+
 router.get("/category/:categoryId", async (req, res, next) => {
   try {
     // 價格排序
@@ -379,8 +388,228 @@ router.delete("/comment/:id", async (req, res, next) => {
   res.send("The comment has been deleted.");
 });
 
-/* -------------------------------- NOTE 上傳圖片 + product info ------------------------------- */
-// const uploader = require("../utils/uploader");
+// TODO 即期品 Read
+router.get("/expire_product", async (req, res, next) => {
+  try {
+    // 篩選
+    // [價格] ASC DESC
+    let priceOrder = req.query.priceOrder;
+
+    if (priceOrder == "2") {
+      orderByPrice = "DESC";
+      // console.log(orderByPrice);
+    } else {
+      orderByPrice = "ASC";
+      // console.log(orderByPrice);
+    }
+
+    // 頁碼
+    // 過濾參數用 query string 來傳遞
+    // 取得目前在第幾頁，而且利用 || 這個特性來做預設值
+    // console.log(req.query.page)   // 如果網址上沒有 page 這個 query string，那 req.query.page 會是 undefined(false)
+    let page = req.query.page || 1;
+    // console.log("current page: ", page);
+
+    // 取得目前的總筆數
+    let [expireProducts] = await pool.execute("SELECT * FROM expire_product");
+    const totalRecords = expireProducts.length;
+    // console.log("total records: ", totalRecords);
+
+    // 計算總共有幾頁
+    let perPage = 4;
+    let totalPage = Math.ceil(totalRecords / perPage);
+    // console.log("total page: ", totalPage);
+
+    // 計算 offset 是多少(計算要跳過幾筆)
+    let offset = (page - 1) * perPage;
+    // console.log("offset: ", offset);
+
+    // 取得這一頁的資料 select * ... limit ? offset ?
+    let [pageResult] = await pool.execute(
+      `SELECT name, price,expire_product.id,count,expire_product.expire_time FROM product, expire_product WHERE expire_product.product_id=product.id  LIMIT ? OFFSET ?`,
+      [perPage, offset]
+    );
+    // console.log(pageResult)
+
+    // 回覆給前端
+    if (pageResult.length === 0) {
+      res.status(404).json(pageResult);
+    } else {
+      res.json({
+        pagination: {
+          totalRecords,
+          totalPage,
+          page,
+        },
+        data: pageResult,
+      });
+    }
+  } catch (e) {
+    res.send(e);
+  }
+});
+
+// NOTE 上傳圖片
+
+router.get("/", async (req, res, next) => {
+  try {
+    // 沒有頁碼的情況
+    // let [products] = await pool.execute("SELECT * FROM product");
+
+    // 篩選
+    // [價格] ASC DESC
+    let priceOrder = req.query.priceOrder;
+    // console.log(priceOrder);
+
+    if (priceOrder == "2") {
+      orderByPrice = "DESC";
+      // console.log(orderByPrice);
+    } else {
+      orderByPrice = "ASC";
+      // console.log(orderByPrice);
+    }
+
+    // 頁碼
+    // 過濾參數用 query string 來傳遞
+    // 取得目前在第幾頁，而且利用 || 這個特性來做預設值
+    // console.log(req.query.page)   // 如果網址上沒有 page 這個 query string，那 req.query.page 會是 undefined(false)
+    let page = req.query.page || 1;
+    // console.log("current page: ", page);
+
+    // 取得目前的總筆數
+    let [products] = await pool.execute("SELECT * FROM product");
+    const totalRecords = products.length;
+    // console.log("total records: ", totalRecords);
+
+    // 計算總共有幾頁
+    let perPage = 12;
+    let totalPage = Math.ceil(totalRecords / perPage);
+    // console.log("total page: ", totalPage);
+
+    // 計算 offset 是多少(計算要跳過幾筆)
+    let offset = (page - 1) * perPage;
+    // console.log("offset: ", offset);
+
+    // 取得這一頁的資料 select * ... limit ? offset ?
+    let [pageResult] = await pool.execute(
+      `SELECT * FROM product ORDER BY price ${orderByPrice} LIMIT ? OFFSET ?`,
+      [perPage, offset]
+    );
+    // console.log(pageResult)
+
+    // 回覆給前端
+    if (pageResult.length === 0) {
+      res.status(404).json(pageResult);
+    } else {
+      res.json({
+        pagination: {
+          totalRecords,
+          totalPage,
+          page,
+        },
+        data: pageResult,
+      });
+    }
+  } catch (e) {
+    res.send(e);
+  }
+});
+// [完成] Read Product (個別產品)
+router.get("/:id", async (req, res, next) => {
+  try {
+    let [product] = await pool.execute("SELECT * FROM product WHERE id = ?", [
+      req.params.id,
+    ]);
+
+    res.send(product);
+  } catch (e) {
+    res.send(e);
+  }
+});
+
+// [完成] Create Product
+router.post("/", async (req, res, next) => {
+  // let id = uuidv4(); // 好像有 auto increment 還要用 uuid 嗎
+  let created_at = new Date();
+  let { name, price, description, express_id } = req.body;
+
+  let [insertData] = await pool.execute(
+    // query excute 差異
+    "INSERT INTO product ( name, price, description, express_id, created_at, valid) VALUES ( ?, ?, ?, ?, ?, ?)",
+    [name, price, description, express_id, created_at, 1]
+  );
+  console.log("New Product Data: ", insertData); // insertedData 是甚麼，為甚麼不是存入的資料
+  res.send("Thanks for poasting.");
+});
+
+// [完成] Update Product
+router.patch("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  const newData = req.body;
+
+  // =====
+  const preDataSql = "SELECT * FROM product WHERE id = ?";
+  const [preData] = await pool.execute(preDataSql, [id]);
+  // res.send(preData);
+
+  const preName = preData[0].name;
+  const prePrice = preData[0].price;
+  const preDescription = preData[0].description;
+  const preexpressId = preData[0].express_id;
+  // console.log(preName, prePrice, preDescription, preexpressId);
+
+  // const sql =
+  // `UPDATE product SET `
+  // `name = ?, price = ?, description = ?,express_id = ? `
+  // `WHERE id = ?`;
+
+  // console.log(preData)
+  // console.log(newData)
+
+  let sql = "";
+  let sqlPreparedArr = [];
+
+  for (let key in preData[0]) {
+    // console.log(preData[0][key])
+    // console.log(newData[key])
+    // console.log(key);
+
+    if (newData[key]) {
+      sql += key + " = ?, ";
+      sqlPreparedArr.push(newData[key]);
+    }
+  }
+  // console.log(sql);
+  // console.log(sqlPreparedArr);
+
+  // 處理最後的、完整的，要執行 update 的 sql 語法
+  sql = "UPDATE product SET " + sql.slice(0, -2) + " WHERE id = ?";
+  // console.log(sql);  // UPDATE product SET name= ?, price= ?, description= ?, express_id= ?, WHERE id = ?
+
+  // 處理最後的、完整的，要執行 update 的 sql 語法的 prepare statemwnt array
+  // console.log(sqlPreparedArr);   // [ 'name', 'price', 'description', 'express_id' ]
+  sqlPreparedArr.push(`${id}`);
+  // console.log(sqlPreparedArr);
+
+  try {
+    let [updateData] = await pool.execute(sql, sqlPreparedArr);
+    res.send(`product ${id} has already been updated.`);
+  } catch (e) {
+    res.status(404);
+    res.send(e);
+  }
+});
+
+// [完成] Delete
+router.delete("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  let [deletedData] = await pool.execute("DELETE FROM product WHERE id = ?", [
+    id,
+  ]);
+  console.log("Deleted Data: ", deletedData);
+  res.send("The data has been deleted.");
+});
+const uploader = require("../utils/uploader");
 
 // upload.single("photo") -> 抓取 key = photo 的資料, 存入 storage
 router.post("/photo", uploader.single("photo"), async (req, res) => {
