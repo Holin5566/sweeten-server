@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-// const argon2 = require("argon2");
+const argon2 = require("argon2");
 const pool = require("../utils/dbConnect");
-// const { response } = require("express");
+const passport = require("../utils/passport");
+const validate = require("../utils/validation");
 require("dotenv").config();
 
 router.use((req, res, next) => {
@@ -36,18 +37,102 @@ router.post("/pay", async (req, res) => {
   res.send(htm);
 });
 
-// TODO 註冊會員
-// router.get("/signup", async (req, res) => {
-//   try {
-//     const hash = await argon2.hash("password");
-//     res.send(hash);
-//   } catch {
-//     (e) => res.send(e);
-//   }
-// });
+/* ------------------------------  NOTE 註冊會員 ------------------------------ */
+// {name: "test", email: "testtest@gmail.com", password: "testtest"}
+router.post("/email", async (req, res) => {
+  const { error, msg } = validate.signup(req.body);
+  if (error) return res.status(404).send(msg);
 
-//TODO 會員 製作身分驗證
-//[完成] CREATE
+  try {
+    const { name, email, phone, password } = req.body;
+    // 驗證重複
+    const sql = "SELECT * FROM user WHERE email=?",
+      [queryEmail] = await pool.execute(sql, [email]);
+    if (queryEmail.length > 0) throw "帳號重複";
+
+    // 雜湊並儲存
+    const hash = await argon2.hash(password);
+    await pool.execute(
+      "INSERT INTO user (email, password, phone, full_name, create_at) VALUES (?, ?, ?, ?, ?)",
+      [email, hash, phone, name, Date().now()]
+    );
+
+    res.send(email + " 註冊成功");
+  } catch (e) {
+    console.log(e);
+    res.status(404).send("註冊失敗");
+  }
+});
+/* ------------------------------- google auth ------------------------------ */
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/api/auth/check" }),
+  async (req, res) => {
+    // Successful authentication, redirect home.
+    res.redirect("http://localhost:3000/");
+  }
+);
+
+/* --------------------------------- 確認登入狀態 --------------------------------- */
+router.get("/check", (req, res) => {
+  console.log("in /auth/check", req.session);
+  res.send(req.session.passport);
+});
+
+/* ---------------------------------- 登入會員 --------------------------------- */
+router.post("/login", async (req, res) => {
+  const { error, msg } = validate.login(req.body);
+  if (error) return res.status(404).send(msg);
+
+  try {
+    const { email, password } = req.body;
+    // // 確認用戶存在
+    const sql = "SELECT * FROM `user` WHERE `user`.`email` = ? ";
+    const [data] = await pool.execute(sql, [email]);
+    if (data.length < 1) throw "用戶不存在";
+    const user = data[0];
+    // 驗證密碼
+    const passwordVerify = await argon2.verify(user.password, password);
+    if (!passwordVerify) throw "密碼驗證失敗";
+
+    // make session
+    const currentUser = {
+      id: user.id,
+      email: user.email,
+      birthday: user.birthday,
+      create_at: user.create_at,
+      phone: user.phone,
+      user_photo_id: user.user_photo_id,
+    };
+    req.session.passport = { user: currentUser };
+    console.log("in /auth/login", req.session);
+    res.send(currentUser);
+  } catch (err) {
+    res.status(404).send(err);
+  }
+});
+router.get("/logout", async (req, res) => {
+  req.session.passport = null;
+  res.send("成功登出");
+});
+
+/* ---------------------------- get user by email --------------------------- */
+router.get("/:email", async (req, res, next) => {
+  const { email } = req.params;
+  try {
+    let [auth] = await pool.execute("SELECT * FROM user WHERE email = ?", [
+      email,
+    ]);
+    res.send(auth[0]);
+  } catch (e) {
+    res.status(404).send(e);
+  }
+});
+
 router.post("/", async (req, res, next) => {
   let {
     id,
@@ -78,8 +163,6 @@ router.post("/", async (req, res, next) => {
   res.send("Thanks for poasting");
 });
 
-//TODO 刪除會員資料
-//[完成]
 router.delete("/:id", async (req, res, next) => {
   const { id } = req.params;
   let [deleteData] = await pool.execute("DELETE FROM user WHERE id = ?", [id]);

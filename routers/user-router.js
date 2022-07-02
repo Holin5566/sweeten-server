@@ -256,7 +256,7 @@ router.patch("/:id", async (req, res, next) => {
 
   try {
     let [updateData] = await pool.execute(sql, sqlPreparedArr);
-    res.send(`user ${id} hs already been updated.`);
+    res.send(`user ${id} has already been updated.`);
   } catch (e) {
     res.status(404);
     res.send(e);
