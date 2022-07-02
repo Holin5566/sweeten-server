@@ -53,8 +53,8 @@ router.post("/email", async (req, res) => {
     // 雜湊並儲存
     const hash = await argon2.hash(password);
     await pool.execute(
-      "INSERT INTO user (email, password, phone, full_name, create_at) VALUES (?, ?, ?, ?, ?)",
-      [email, hash, phone, name, Date().now()]
+      "INSERT INTO user (id, email, password, phone, full_name, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+      [Date.now(), email, hash, phone, name, new Date()]
     );
 
     res.send(email + " 註冊成功");
