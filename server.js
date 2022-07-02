@@ -12,10 +12,10 @@ const {
   setFakeData,
   ecpayRouter,
 } = require("./routers");
-const pool = require("./utils/dbConnect");
+// const pool = require("./utils/dbConnect");
 require("dotenv").config();
 
-// NOTE 連接 socketio
+/* --------------------------- socketio -------------------------- */
 const { Server } = require("socket.io");
 const httpServer = require("http").createServer(app);
 const io = new Server(httpServer, {
@@ -26,22 +26,28 @@ const io = new Server(httpServer, {
 });
 require("./socket.io")(io);
 
-// NOTE cors
+/* ------------------------------  cors ------------------------------ */
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000", "http://localhost:3001"],
     credentials: true,
   })
 );
 
-// NOTE bady parser
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-// NOTE 啟用 session
+/* ---------------------------  啟用 session --------------------------- */
 const expressSession = require("express-session");
+const FileStore = require("session-file-store")(expressSession);
+const path = require("path");
+const sessionStore = new FileStore({
+  path: path.join(__dirname, "..", "sessions"),
+});
 app.use(
-  expressSession({ secret: "test", resave: false, saveUninitialized: true })
+  expressSession({
+    store: sessionStore,
+    secret: "test",
+    resave: false,
+    saveUninitialized: false,
+  })
 );
 // const cookieSession = require("cookie-session");
 // app.use(
@@ -52,13 +58,16 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+/* ---------------------------  bady parser -------------------------- */
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+/* -----------------------------  routers ---------------------------- */
 app.get("/", (req, res) => {
   console.log("open server");
   res.send("sweteen server");
 });
-
-// NOTE routers
-
+app.use("/public", express.static("public"));
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);

@@ -53,8 +53,8 @@ router.post("/email", async (req, res) => {
     // 雜湊並儲存
     const hash = await argon2.hash(password);
     await pool.execute(
-      "INSERT INTO user (email, password, phone, full_name) VALUES (?, ?, ?, ?)",
-      [email, hash, phone, name]
+      "INSERT INTO user (email, password, phone, full_name, create_at) VALUES (?, ?, ?, ?, ?)",
+      [email, hash, phone, name, Date().now()]
     );
 
     res.send(email + " 註冊成功");
@@ -72,9 +72,6 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/api/auth/check" }),
   async (req, res) => {
-    console.log(req.body);
-    console.log(req.query);
-    console.log(req.params);
     // Successful authentication, redirect home.
     res.redirect("http://localhost:3000/");
   }
@@ -82,8 +79,8 @@ router.get(
 
 // FIXME isAuthenticated 是 false
 router.get("/check", (req, res) => {
-  console.log(req.isAuthenticated());
-  res.send(req.isAuthenticated());
+  console.log("in /auth/check", req.session);
+  res.send(req.session);
 });
 
 /* ---------------------------------- NOTE 登入會員 --------------------------------- */
@@ -111,7 +108,8 @@ router.post("/login", async (req, res) => {
       phone: user.phone,
       user_photo_id: user.user_photo_id,
     };
-    req.session.user = currentUser;
+    req.session.passport = { user: currentUser };
+    console.log("in /auth/login", req.session);
     res.send(currentUser);
   } catch (err) {
     res.status(404).send(err);
@@ -131,8 +129,6 @@ router.get("/:email", async (req, res, next) => {
   }
 });
 
-//TODO 會員 製作身分驗證
-//[完成] CREATE
 router.post("/", async (req, res, next) => {
   let {
     id,
@@ -163,8 +159,6 @@ router.post("/", async (req, res, next) => {
   res.send("Thanks for poasting");
 });
 
-//TODO 刪除會員資料
-//[完成]
 router.delete("/:id", async (req, res, next) => {
   const { id } = req.params;
   let [deleteData] = await pool.execute("DELETE FROM user WHERE id = ?", [id]);
