@@ -191,8 +191,16 @@ for (let i = 1; i < 4; i++) {
 // console.log(setExpressId);
 
 // =============== 產品 * 100 ===============
-const productMaker = (id, name, price, description, express_id, created_at) => {
-  return { id, name, price, description, express_id, created_at };
+const productMaker = (
+  id,
+  name,
+  price,
+  description,
+  express_id,
+  created_at,
+  valid
+) => {
+  return { id, name, price, description, express_id, created_at, valid };
 };
 
 // 商品價格
@@ -214,7 +222,8 @@ for (let i = 1; i < 101; i++) {
       varPrice(),
       varStr(),
       varExpress(),
-      new Date()
+      new Date(),
+      1
     )
   );
 }
@@ -276,9 +285,141 @@ for (let i = 1; i < 51; i++) {
 }
 // console.log(likedLesson);
 
-// 亂數選字的方法 (參考)
-// const list = ["a","b","c"]
-// list[Math.random()]
+// =============== payment ===============
+const paymentMaker = (id, name) => {
+  return { id, name };
+};
+
+const paymentName = ["信用卡", "現金(貨到付款)", "現金(店取)"];
+
+const payment = [];
+
+for (let i = 1; i < paymentName.length + 1; i++) {
+  payment.push(paymentMaker(i, paymentName[i - 1]));
+}
+// console.log(payment);
+
+// =============== orderStatus ===============
+const orderStatusMaker = (id, name) => {
+  return { id, name };
+};
+
+const orderStatusName = ["收到訂單", "製作中", "出貨", "已送達", "取消訂單"];
+
+const orderStatus = [];
+
+for (let i = 1; i < orderStatusName.length + 1; i++) {
+  orderStatus.push(orderStatusMaker(i, orderStatusName[i - 1]));
+}
+// console.log(orderStatus);
+
+// =============== order_info * 100 ===============
+
+const orderInfoMaker = (
+  id,
+  user_id,
+  order_status_id,
+  address,
+  payment_id,
+  timestamp
+) => {
+  return { id, user_id, order_status_id, address, payment_id, timestamp };
+};
+
+const randomUserId = () => Math.ceil(Math.random() * 10);
+const randomOrderStatusId = () =>
+  Math.ceil(Math.random() * orderStatusName.length);
+const addressStr = () => Math.random().toString(36).substr(2);
+const randomPaymentId = () => Math.floor(Math.random() * 2) + 1;
+
+const order_info = [];
+
+for (let i = 1; i <= 100; i++) {
+  order_info.push(
+    orderInfoMaker(
+      i,
+      randomUserId(),
+      randomOrderStatusId(),
+      addressStr(),
+      randomPaymentId(),
+      new Date()
+    )
+  );
+}
+
+// console.log(order_info);
+
+// =============== coupon * 10 ===============
+const couponMacker = (
+  id,
+  name,
+  code,
+  discount,
+  start_date,
+  end_date,
+  limited
+) => {
+  return { id, name, code, discount, start_date, end_date, limited };
+};
+
+const couponName = () => Math.random().toString(36).substr(2);
+const couponCode = () => Math.random().toString(36).substr(2);
+const discount = () => Math.ceil(Math.random() * 10) * 20;
+const limited = () => Math.floor(Math.random() * 5) + 1;
+
+const coupons = [];
+
+for (let i = 1; i <= 10; i++) {
+  coupons.push(
+    couponMacker(
+      i,
+      couponName(),
+      couponCode(),
+      discount(),
+      new Date(),
+      new Date(),
+      limited()
+    )
+  );
+}
+
+// console.log(coupons);
+
+// =============== order_product * 200 ===============
+const orderProductMacker = (
+  id,
+  order_info_id,
+  product_id,
+  coupon_id,
+  memo,
+  price
+) => {
+  return { id, order_info_id, product_id, coupon_id, memo, price };
+};
+
+const randomOrderInfoId = () => Math.ceil(Math.random() * 100);
+const randomProductId = () => Math.ceil(Math.random() * 100);
+const randomCouponId = () => Math.ceil(Math.random() * 10);
+const memo = () => Math.random().toString(36).substr(2);
+
+const orderProduct = [];
+
+for (let i = 1; i <= 150; i++) {
+  orderProduct.push(
+    orderProductMacker(
+      i,
+      randomOrderInfoId(),
+      randomProductId(),
+      randomCouponId(),
+      memo(),
+      varPrice()
+    )
+  );
+}
+
+// console.log(orderProduct);
+
+// ========================================
 
 module.exports = {
   setGender,
@@ -289,4 +430,13 @@ module.exports = {
   lessons,
   likedLesson,
   likedProduct,
+  payment,
+  orderStatus,
+  order_info,
+  coupons,
+  orderProduct,
 };
+
+// 亂數選字的方法 (參考)
+// const list = ["a","b","c"]
+// list[Math.random()]
