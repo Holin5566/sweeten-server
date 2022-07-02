@@ -77,13 +77,13 @@ router.get(
   }
 );
 
-// FIXME isAuthenticated 是 false
+/* --------------------------------- 確認登入狀態 --------------------------------- */
 router.get("/check", (req, res) => {
   console.log("in /auth/check", req.session);
-  res.send(req.session);
+  res.send(req.session.passport);
 });
 
-/* ---------------------------------- NOTE 登入會員 --------------------------------- */
+/* ---------------------------------- 登入會員 --------------------------------- */
 router.post("/login", async (req, res) => {
   const { error, msg } = validate.login(req.body);
   if (error) return res.status(404).send(msg);
@@ -114,6 +114,10 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     res.status(404).send(err);
   }
+});
+router.get("/logout", async (req, res) => {
+  req.session.passport = null;
+  res.send("成功登出");
 });
 
 /* ---------------------------- get user by email --------------------------- */

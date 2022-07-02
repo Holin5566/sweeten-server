@@ -13,16 +13,6 @@ passport.serializeUser(async (user, done) => {
   // 從 GoogleStrategy 獲得 user
   console.log("serializeUser");
 
-  // 確認重複
-  let sql = "SELECT * FROM user WHERE email = ?";
-  const [searchEmail] = await pool.execute(sql, [user.email]),
-    hasCreated = searchEmail.length > 0;
-  if (!hasCreated) {
-    // 不重複則註冊
-    sql = "INSERT INTO user (email, password, full_name) VALUES (?, ?, ?)";
-    await pool.execute(sql, [user.email, uuidv4(), user.name]);
-  }
-
   done(null, { ...user, from: "serializeUser" }); //user 存入 session
 });
 
@@ -42,9 +32,7 @@ passport.use(
       callbackURL: "http://localhost:8001/api/auth/google/callback",
       passReqToCallback: true,
     },
-    (accessToken, refreshToken, profile, done) => {
-      // found user -> done(null,user)
-      // not fount -> create user -> done(null,user)
+    async (req, accessToken, refreshToken, profile, done) => {
       const user = {
         email: profile.emails[0].value,
         name: profile.displayName,
@@ -53,6 +41,16 @@ passport.use(
         accessToken,
         refreshToken,
       };
+      // found user -> done(null,user)
+      let sql = "SELECT * FROM user WHERE email = ?";
+      const [searchEmail] = await pool.execute(sql, [user.email]),
+        hasCreated = searchEmail.length > 0;
+      if (!hasCreated) {
+        // not fount -> create user -> done(null,user)
+        sql = "INSERT INTO user (email, password, full_name) VALUES (?, ?, ?)";
+        await pool.execute(sql, [user.email, uuidv4(), user.name]);
+      }
+
       done(null, user); // 設定 session
     }
   )
