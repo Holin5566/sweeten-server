@@ -36,6 +36,109 @@ const pool = require("../utils/dbConnect");
 // });
 
 // ==================================================
+const maker = require("../utils/fakeData");
+router.get("/setAllData", async (req, res) => {
+  /* --------------------------------- comment -------------------------------- */
+  const fakeComment = maker.makeComment();
+  for (let i = 0; i < fakeComment.length; i++) {
+    const { user_id, product_id, content, score } = fakeComment[i];
+    const sql =
+      "INSERT INTO comment (user_id, product_id, content, score) VALUES (?, ?, ?, ?)";
+    pool
+      .execute(sql, [user_id, product_id, content, score])
+      .then((e) => {})
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+  /* --------------------------------- Express -------------------------------- */
+  const fakeExpress = maker.makeExpress();
+  for (let i = 0; i < fakeExpress.length; i++) {
+    const { name } = fakeExpress[i];
+    const sql = "INSERT INTO express (name) VALUES (?)";
+    pool
+      .execute(sql, [name])
+      .then((e) => {})
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+  /* ---------------------------- fakeCategory --------------------------- */
+  const fakeFavorCategory = maker.makeFavorCategory();
+  for (let i = 0; i < fakeFavorCategory.length; i++) {
+    const { id, name } = fakeFavorCategory[i];
+    const sql = "INSERT INTO category (id,name) VALUES (?, ?)";
+    pool
+      .execute(sql, [id, name])
+      .then((e) => {})
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+  const fakeTypeCategory = maker.makeTypeCategory();
+  for (let i = 0; i < fakeTypeCategory.length; i++) {
+    const { id, name } = fakeTypeCategory[i];
+    const sql = "INSERT INTO category (id,name) VALUES (?, ?)";
+    pool
+      .execute(sql, [id, name])
+      .then((e) => {})
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+  /* ------------------------------ fakeOrderInfo ----------------------------- */
+  const fakeOrderInfo = maker.makeOrderInfo();
+  for (let i = 0; i < fakeOrderInfo.length; i++) {
+    const { user_id, address, payment_id, order_status_id } = fakeOrderInfo[i];
+    const sql =
+      "INSERT INTO order_info (user_id, address, payment_id, order_status_id) VALUES (?, ?, ?, ?)";
+    pool
+      .execute(sql, [user_id, address, payment_id, order_status_id])
+      .then((e) => {})
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+  /* ------------------------------ order product ----------------------------- */
+  const fakeOrderProduct = maker.makeOrderProduct();
+  for (let i = 0; i < fakeOrderProduct.length; i++) {
+    const { product_id, order_info_id, memo, price } = fakeOrderProduct[i];
+    const sql =
+      "INSERT INTO order_product (product_id, order_info_id, memo, price) VALUES (?, ?, ?, ?)";
+    pool
+      .execute(sql, [product_id, order_info_id, memo, price])
+      .then((e) => {})
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+  /* ------------------------------- order state ------------------------------ */
+  const fakeOrderState = maker.makeOrderState();
+  for (let i = 0; i < fakeOrderState.length; i++) {
+    const name = fakeOrderState[i];
+    const sql = "INSERT INTO order_status (name) VALUES (?)";
+    pool
+      .execute(sql, [name])
+      .then((e) => {})
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+  /* --------------------------------- prodcut -------------------------------- */
+  const fakeProduct = maker.makeProduct();
+  for (let i = 0; i < fakeProduct.length; i++) {
+    const { id, name, price, description, express_id } = fakeProduct[i];
+    const sql =
+      "INSERT INTO product (id, name, price, description, express_id) VALUES (?, ?, ?, ?, ?)";
+    pool
+      .execute(sql, [id, name, price, description, express_id])
+      .then((e) => {})
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+  res.send("ok");
+});
 
 // 性別
 router.post("/gender", (req, res, next) => {

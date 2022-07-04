@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const passport = require("passport");
 const {
   authRouter,
   userRouter,
@@ -10,11 +11,12 @@ const {
   orderRouter,
   setFakeData,
   ecpayRouter,
+  expiryRouter,
 } = require("./routers");
-const pool = require("./utils/dbConnect");
+// const pool = require("./utils/dbConnect");
 require("dotenv").config();
 
-// NOTE 連接 socketio
+/* --------------------------- socketio -------------------------- */
 const { Server } = require("socket.io");
 const httpServer = require("http").createServer(app);
 const io = new Server(httpServer, {
@@ -25,24 +27,43 @@ const io = new Server(httpServer, {
 });
 require("./socket.io")(io);
 
-// NOTE cors
+/* ------------------------------  cors ------------------------------ */
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000", "http://localhost:3001"],
     credentials: true,
   })
 );
 
-// NOTE bady parser
+/* ---------------------------  啟用 session --------------------------- */
+const expressSession = require("express-session");
+const FileStore = require("session-file-store")(expressSession);
+const path = require("path");
+const sessionStore = new FileStore({
+  path: path.join(__dirname, "..", "sessions"),
+});
+app.use(
+  expressSession({
+    store: sessionStore,
+    secret: "test",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+// const cookieSession = require("cookie-session");
+// app.use(
+//   cookieSession({
+//     keys: ["secret"],
+//   })
+// );
+app.use(passport.initialize());
+app.use(passport.session());
+
+/* ---------------------------  bady parser -------------------------- */
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// NOTE 啟用 session
-const expressSession = require("express-session");
-app.use(
-  expressSession({ secret: "test", resave: false, saveUninitialized: false })
-);
-
+/* -----------------------------  routers ---------------------------- */
 app.get("/", (req, res) => {
   console.log("open server");
   res.send("sweteen server");
@@ -57,6 +78,7 @@ app.use("/api/product", productRouter);
 app.use("/api/lesson", lessonRouter);
 app.use("/api/coupon", couponRouter);
 app.use("/api/order", orderRouter);
+app.use("/api/expiry", expiryRouter);
 // ----------------------------------------
 app.use("/setfakedata", setFakeData);
 app.use("/api/ecpay", ecpayRouter);
