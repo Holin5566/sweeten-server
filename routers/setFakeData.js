@@ -124,6 +124,19 @@ router.get("/setAllData", async (req, res) => {
         console.log(e);
       });
   }
+  /* --------------------------------- prodcut -------------------------------- */
+  const fakeProduct = maker.makeProduct();
+  for (let i = 0; i < fakeProduct.length; i++) {
+    const { id, name, price, description, express_id } = fakeProduct[i];
+    const sql =
+      "INSERT INTO product (id, name, price, description, express_id) VALUES (?, ?, ?, ?, ?)";
+    pool
+      .execute(sql, [id, name, price, description, express_id])
+      .then((e) => {})
+      .catch((e) => {
+        console.log(e);
+      });
+  }
   res.send("ok");
 });
 
