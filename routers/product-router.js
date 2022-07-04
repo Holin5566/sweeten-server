@@ -217,8 +217,8 @@ router.get("/:id", async (req, res, next) => {
     //   [1, req.params.id]
     // );
     let [product] = await pool.execute(
-      "SELECT product_photo.name AS img_name, product_photo.path, product.* FROM product_photo, product product.id = ? AND valid = ?",
-      [1, req.params.id]
+      "SELECT * FROM product WHERE product.id = ? AND valid = ?",
+      [req.params.id, 1]
     );
 
     res.send(product);

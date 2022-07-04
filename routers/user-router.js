@@ -232,7 +232,6 @@ router.patch("/:id", async (req, res, next) => {
   //設定更改前資料
   const preFullName = preData[0].full_name;
   const preEmail = preData[0].email;
-  const prePassword = preData[0].password;
   const preBirthday = preData[0].birthday;
   const preGender = preData[0].gender_id;
   const preCountry = preData[0].country_id;
