@@ -19,7 +19,7 @@ const makeProduct = () => {
   for (let i = 0; i < productCount; i++) {
     result.push({
       id: i + 1,
-      name: name(),
+      name: name(i),
       price: price(1500),
       description: description(),
       express_id: express_id(),
