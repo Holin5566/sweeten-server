@@ -50,6 +50,7 @@ app.get("/", (req, res) => {
 
 // NOTE routers
 
+app.use("/public", express.static("public"));
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);

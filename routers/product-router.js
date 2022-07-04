@@ -391,8 +391,11 @@ router.post("/photo", uploader.single("photo"), async (req, res) => {
 
   // let productId = () => String(+new Date()).slice(0, 10);
   const photoName = req.file.originalname.split(".").slice(-2, -1)[0];
+  const filename = req.file.originalname.split(".").slice(1)[0]; // 副檔名
   const path = req.file.path;
   let { name, price, description, express_id } = req.body;
+
+  // console.log(req.file, filename);
 
   // 產品資料 sql
   let [insertData] = await pool.execute(
@@ -406,6 +409,7 @@ router.post("/photo", uploader.single("photo"), async (req, res) => {
     "INSERT INTO product_photo (product_id, name, path) VALUES (?, ?, ?)",
     [id, photoName, path]
   );
+
   res.send(req.file);
 });
 
