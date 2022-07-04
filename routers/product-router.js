@@ -119,11 +119,7 @@ router.get("/", async (req, res, next) => {
     res.send(e);
   }
 });
-router.get("/all_data", async (req, res, next) => {
-  let [data] = await pool.execute("SELECT * FROM expriy");
-  console.log(data);
-  res.send(data);
-});
+
 // TODO 商品喜歡的 USER有哪些
 router.get("/comment/product/:id", async (req, res, next) => {
   try {
@@ -390,73 +386,6 @@ router.delete("/comment/:id", async (req, res, next) => {
   );
   console.log("Deleted Data: ", deletedProductComment);
   res.send("The comment has been deleted.");
-});
-//test read所有商品
-// router.get("/all_data", async (req, res, next) => {
-//   let [data] = await pool.execute("SELECT * FROM expriy");
-//   console.log(data);
-//   res.send(data);
-// });
-// TODO 即期品 Read
-router.get("/expire_product", async (req, res, next) => {
-  try {
-    // 篩選
-    // [價格] ASC DESC
-    let priceOrder = req.query.priceOrder;
-
-    if (priceOrder == "2") {
-      orderByPrice = "DESC";
-      // console.log(orderByPrice);
-    } else {
-      orderByPrice = "ASC";
-      // console.log(orderByPrice);
-    }
-
-    // 頁碼
-    // 過濾參數用 query string 來傳遞
-    // 取得目前在第幾頁，而且利用 || 這個特性來做預設值
-    // console.log(req.query.page)   // 如果網址上沒有 page 這個 query string，那 req.query.page 會是 undefined(false)
-    let page = req.query.page || 1;
-    // console.log("current page: ", page);
-
-    // 取得目前的總筆數
-    let [expireProducts] = await pool.execute("SELECT * FROM expriy");
-    const totalRecords = expireProducts.length;
-    console.log(totalRecords);
-    // console.log("total records: ", totalRecords);
-
-    // 計算總共有幾頁
-    let perPage = 1;
-    let totalPage = Math.ceil(totalRecords / perPage);
-    // console.log("total page: ", totalPage);
-
-    // 計算 offset 是多少(計算要跳過幾筆)
-    let offset = (page - 1) * perPage;
-    // console.log("offset: ", offset);
-
-    // 取得這一頁的資料 select * ... limit ? offset ?
-    let [pageResult] = await pool.execute(
-      `SELECT name, price,expriy.id,count,expriy.expriy_date FROM product, expriy WHERE expriy.product_id=product.id LIMIT ? OFFSET ?`,
-      [perPage, offset]
-    );
-    console.log(pageResult);
-
-    // 回覆給前端
-    if (pageResult.length === 0) {
-      res.status(404).json(pageResult);
-    } else {
-      res.json({
-        pagination: {
-          totalRecords,
-          totalPage,
-          page,
-        },
-        data: pageResult,
-      });
-    }
-  } catch (e) {
-    res.send(e);
-  }
 });
 
 // NOTE 上傳圖片
