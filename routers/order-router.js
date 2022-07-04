@@ -91,7 +91,7 @@ router.get("/user/:user_id", async (req, res, next) => {
     const [personalOrder] = await pool.execute(
       `SELECT order_product.*, order_info.user_id, order_info.order_status_id, order_info.address, order_info.payment_id, order_info.timestamp, product.name 
       FROM order_product, order_info, product
-      WHERE order_info_id = order_info.id AND order_product.product_id = product.id AND user_id = ?;`,
+      WHERE order_info_id = order_info.id AND order_product.product_id = product.id AND user_id = ?`,
       [user_id]
     );
     const totalResults = personalOrder.length;
@@ -112,9 +112,9 @@ router.get("/user/:user_id", async (req, res, next) => {
     //   [user_id, perPage, offset]
     // );
     const [pageResult] = await pool.execute(
-      `SELECT order_product.*, order_info.user_id, order_info.order_status_id, order_info.address, order_info.payment_id, order_info.timestamp 
-      FROM order_product, order_info 
-      WHERE order_info_id = order_info.id AND user_id = ? 
+      `SELECT order_product.*, order_info.user_id, order_info.order_status_id, order_info.address, order_info.payment_id, order_info.timestamp, product.name 
+      FROM order_product, order_info, product
+      WHERE order_info_id = order_info.id AND order_product.product_id = product.id AND user_id = ? 
       ORDER BY timestamp DESC 
       LIMIT ? OFFSET ?`,
       [user_id, perPage, offset]
