@@ -22,7 +22,9 @@ router.get("/", async (req, res, next) => {
 
     // 取的所有資料筆數
     // const [order] = await pool.execute("SELECT * FROM order_info");
-    const [order] = await pool.execute("SELECT order_product.*, order_info.user_id, order_info.order_status_id, order_info.address, order_info.payment_id, order_info.timestamp FROM order_product, order_info WHERE order_info_id = order_info.id");
+    const [order] = await pool.execute(
+      "SELECT order_product.*, order_info.user_id, order_info.order_status_id, order_info.address, order_info.payment_id, order_info.timestamp FROM order_product, order_info WHERE order_info_id = order_info.id"
+    );
     const totalResults = order.length;
     // console.log(totalResults);
 
@@ -87,9 +89,9 @@ router.get("/user/:user_id", async (req, res, next) => {
     //   [user_id]
     // );
     const [personalOrder] = await pool.execute(
-      `SELECT order_product.*, order_info.user_id, order_info.order_status_id, order_info.address, order_info.payment_id, order_info.timestamp 
-      FROM order_product, order_info 
-      WHERE order_info_id = order_info.id AND user_id = ?`,
+      `SELECT order_product.*, order_info.user_id, order_info.order_status_id, order_info.address, order_info.payment_id, order_info.timestamp, product.name 
+      FROM order_product, order_info, product
+      WHERE order_info_id = order_info.id AND order_product.product_id = product.id AND user_id = ?;`,
       [user_id]
     );
     const totalResults = personalOrder.length;
