@@ -220,7 +220,7 @@ router.get("/:id", async (req, res, next) => {
       "SELECT product_photo.name AS img_name, product_photo.path, product.* FROM product_photo, product WHERE product.id = ? AND valid = ?",
       [req.params.id, 1]
     );
-
+    console.log(product);
     res.send(product);
   } catch (e) {
     res.send(e);
