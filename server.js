@@ -11,6 +11,7 @@ const {
   orderRouter,
   setFakeData,
   ecpayRouter,
+  expiryRouter,
 } = require("./routers");
 // const pool = require("./utils/dbConnect");
 require("dotenv").config();
@@ -74,6 +75,7 @@ app.use("/api/product", productRouter);
 app.use("/api/lesson", lessonRouter);
 app.use("/api/coupon", couponRouter);
 app.use("/api/order", orderRouter);
+app.use("/api/expiry", expiryRouter);
 // ----------------------------------------
 app.use("/setfakedata", setFakeData);
 app.use("/api/ecpay", ecpayRouter);

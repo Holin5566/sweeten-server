@@ -7,4 +7,5 @@ module.exports = {
   orderRouter: require("./order-router"),
   setFakeData: require("./setFakeData"),
   ecpayRouter: require("./ecpay-router"),
+  expiryRouter: require("./expriy-router"),
 };
