@@ -137,6 +137,20 @@ router.get("/setAllData", async (req, res) => {
         console.log(e);
       });
   }
+  /* ------------------------------- makeExpiry ------------------------------- */
+  const fakeExpiry = maker.makeExpiry();
+  for (let i = 0; i < fakeExpiry.length; i++) {
+    const { product_id, expiry_date, count, discount } = fakeExpiry[i];
+    const sql =
+      "INSERT INTO expiry (product_id, expiry_date, count,discount) VALUES (?, ?, ?, ?)";
+    pool
+      .execute(sql, [product_id, expiry_date, count, discount])
+      .then((e) => {})
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+
   res.send("ok");
 });
 

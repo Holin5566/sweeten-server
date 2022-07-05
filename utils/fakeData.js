@@ -98,15 +98,28 @@ const makeOrderProduct = () => {
     result.push({
       product_id: i + 1,
       order_info_id: parseInt(10 * Math.random()) + 1,
-      memo: "備註",
+      memo: parseInt(5 * Math.random()) + 1,
       price: parseInt(10000 * Math.random()),
     });
   }
-  console.log(result);
   return result;
 };
-
 /* ---------------------------- product category ---------------------------- */
+const makeExpiry = () => {
+  const result = [];
+  for (let i = 0; i < 10; i++) {
+    result.push({
+      product_id: i + 1,
+      expiry_date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " "),
+      count: parseInt(5 * Math.random()) + 1,
+      discount: 60,
+    });
+  }
+  return result;
+};
 
 module.exports = {
   makeComment,
@@ -117,4 +130,5 @@ module.exports = {
   makeOrderState,
   makeProduct,
   makeTypeCategory,
+  makeExpiry,
 };
