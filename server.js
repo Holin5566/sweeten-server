@@ -68,6 +68,9 @@ app.get("/", (req, res) => {
   console.log("open server");
   res.send("sweteen server");
 });
+
+// NOTE routers
+
 app.use("/public", express.static("public"));
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);

@@ -32,7 +32,7 @@ router.get("/expire_product", async (req, res, next) => {
     // console.log("current page: ", page);
 
     // 取得目前的總筆數
-    let [expireProducts] = await pool.execute("SELECT * FROM expriy");
+    let [expireProducts] = await pool.execute("SELECT * FROM expiry");
     const totalRecords = expireProducts.length;
     console.log(totalRecords);
     // console.log("total records: ", totalRecords);
@@ -48,7 +48,7 @@ router.get("/expire_product", async (req, res, next) => {
 
     // 取得這一頁的資料 select * ... limit ? offset ?
     let [pageResult] = await pool.execute(
-      `SELECT name, price,expriy.id,count,expriy.expriy_date FROM product, expriy WHERE expriy.product_id=product.id LIMIT ? OFFSET ?`,
+      `SELECT name, price,expiry.id,count,expiry.expiry_date FROM product, expiry WHERE expiry.product_id=product.id LIMIT ? OFFSET ?`,
       [perPage, offset]
     );
     console.log(pageResult);
