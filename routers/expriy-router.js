@@ -38,7 +38,7 @@ router.get("/expire_product", async (req, res, next) => {
     // console.log("total records: ", totalRecords);
 
     // 計算總共有幾頁
-    let perPage = 4;
+    let perPage = 15;
     let totalPage = Math.ceil(totalRecords / perPage);
     // console.log("total page: ", totalPage);
 
@@ -73,10 +73,10 @@ router.get("/expire_product", async (req, res, next) => {
 
 // TODO 即期良品 POST
 router.post("/", async (req, res, next) => {
-  let { id, product_id, expiry_date, count } = req.body;
+  let { id, expiry_date, count, discount } = req.body;
   let [inserData] = await pool.execute(
-    "INSERT INTO expiry (id, product_id, expiry_date, count) VALUES (?,?,?,?)",
-    [id, product_id, expiry_date, count]
+    "INSERT INTO expiry (product_id, expiry_date, count, discount) VALUES (?, ?, ?, ?)",
+    [id, expiry_date, count, discount]
   );
   res.json("資料更新囉");
 });
