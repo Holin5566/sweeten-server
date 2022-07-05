@@ -209,23 +209,23 @@ router.get("/discontinued", async (req, res, next) => {
   }
 });
 
-/* ---------------------------- [完成] Read Product (個別產品) ---------------------------- */
-router.get("/:id", async (req, res, next) => {
-  try {
-    // let [product] = await pool.execute(
-    //   "SELECT * FROM product WHERE valid = ? AND id = ?",
-    //   [1, req.params.id]
-    // );
-    let [product] = await pool.execute(
-      "SELECT product_photo.name AS img_name, product_photo.path, product.* FROM product_photo, product WHERE product.id = ? AND valid = ?",
-      [req.params.id, 1]
-    );
-    console.log(product);
-    res.send(product);
-  } catch (e) {
-    res.send(e);
-  }
-});
+// /* ---------------------------- [完成] Read Product (個別產品) ---------------------------- */
+// router.get("/:id", async (req, res, next) => {
+//   try {
+//     // let [product] = await pool.execute(
+//     //   "SELECT * FROM product WHERE valid = ? AND id = ?",
+//     //   [1, req.params.id]
+//     // );
+//     let [product] = await pool.execute(
+//       "SELECT product_photo.name AS img_name, product_photo.path, product.* FROM product_photo, product WHERE product.id = ? AND valid = ?",
+//       [req.params.id, 1]
+//     );
+//     console.log(product);
+//     res.send(product);
+//   } catch (e) {
+//     res.send(e);
+//   }
+// });
 
 /* ------------------------- // [完成] Create Product (沒有圖片) ------------------------- */
 router.post("/", async (req, res, next) => {
