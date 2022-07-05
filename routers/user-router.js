@@ -52,7 +52,7 @@ router.get("/comment/:user_id", async (req, res, next) => {
   let offect = (page - 1) * perPage;
   // 5. 取得一頁的資料
   let [pageResult] = await pool.execute(
-    "SELECT product.name as product_name, product.price, user.full_name, comment.content, comment.score FROM comment, product, user WHERE user.id=comment.user_id AND comment.product_id=product.id AND user_id = ?  LIMIT ? OFFSET ?",
+    "SELECT product.name as product_name,product.id as product_id, product.price, user.full_name, comment.content, comment.score FROM comment, product, user WHERE user.id=comment.user_id AND comment.product_id=product.id AND user_id = ?  LIMIT ? OFFSET ?",
     [req.params.user_id, perPage, offect]
   );
   // 6. 回覆給前端的資料
