@@ -70,4 +70,15 @@ router.get("/expire_product", async (req, res, next) => {
     res.send(e);
   }
 });
+
+// TODO 即期良品 POST
+router.post("/", async (req, res, next) => {
+  let { id, product_id, expiry_date, count } = req.body;
+  let [inserData] = await pool.execute(
+    "INSERT INTO expiry (id, product_id, expiry_date, count) VALUES (?,?,?,?)",
+    [id, product_id, expiry_date, count]
+  );
+  res.json("資料更新囉");
+});
+
 module.exports = router;
