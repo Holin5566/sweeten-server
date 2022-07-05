@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const { v4: uuidv4 } = require("uuid");
+const { empty } = require("uuidv4");
 require("dotenv").config();
 
 //表單驗證用套件
@@ -269,6 +271,40 @@ router.patch("/:id", async (req, res, next) => {
     res.status(404);
     res.send(e);
   }
+});
+const uploader_user = require("../utils/uploader_user");
+// NOTE 會員新增照片
+
+router.post("/photo", uploader_user.single("photo"), async (req, res) => {
+  // console.log(req.file);
+  let { id } = req.body;
+  // let created_at = new Date();
+
+  // let productId = () => String(+new Date()).slice(0, 10);
+  const photoName = req.file.originalname.split(".").slice(-2, -1)[0];
+  const filename = req.file.originalname.split(".").slice(1)[0]; // 副檔名
+  const path = req.file.path;
+  console.log(req.file);
+
+  // let { name, price, description, express_id } = req.body;
+  // let { name, price, description, express_id } = req.body;
+
+  // console.log(req.file, filename);
+
+  // 產品資料 sql
+  // let [insertData] = await pool.execute(
+  //   // query excute 差異
+  //   "INSERT INTO product (id, name, price, description, express_id, created_at, valid) VALUES ( ?, ?, ?, ?, ?, ?, ?)",
+  //   [id, name, price, description, express_id, created_at, 1]
+  // );
+
+  // 產品圖片 sql
+  let [insertImg] = await pool.execute(
+    "INSERT INTO user_photo (user_id, name, path) VALUES (?, ?, ?)",
+    [id, photoName, path]
+  );
+
+  res.send(req.file);
 });
 
 // TODO 會員課程
