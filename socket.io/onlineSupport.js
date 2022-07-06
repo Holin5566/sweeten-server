@@ -1,7 +1,6 @@
 const hashId = {};
 
 module.exports = (io, socket) => {
-<<<<<<< HEAD
   /* -------------------------------- user side ------------------------------- */
   socket.on("userConnect", (id) => {
     console.log("connect " + id);
@@ -45,9 +44,5 @@ module.exports = (io, socket) => {
       delete hashId[id];
       console.log(hashId);
     });
-=======
-  socket.on("support", (message) => {
-    io.emit("support", message);
->>>>>>> c719b6ad4006fb3f58214779bd91cb3b8c5a75fe
   });
 };

@@ -37,7 +37,7 @@ const scoreChangeRules = [
 // TODO 會員全部評論
 router.get("/comment/:id", async (req, res, next) => {
   let [pageResult] = await pool.execute(
-    "SELECT product.name as product_name, product.price,product.id, user.full_name, comment.content, comment.score FROM comment, product, user WHERE user.id=comment.user_id AND comment.product_id=product.id AND user_id = ? ",
+    "SELECT product.name as product_name, comment.id as comment_id,product.price,product.id, user.full_name, comment.content, comment.score FROM comment, product, user WHERE user.id=comment.user_id AND comment.product_id=product.id AND user_id = ? ",
     [req.params.id]
   );
   res.send(pageResult);
