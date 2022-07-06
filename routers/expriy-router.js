@@ -48,7 +48,7 @@ router.get("/expire_product", async (req, res, next) => {
 
     // 取得這一頁的資料 select * ... limit ? offset ?
     let [pageResult] = await pool.execute(
-      `SELECT name, price,count,expiry.* FROM product, expiry WHERE expiry.product_id=product.id LIMIT ? OFFSET ?`,
+      `SELECT name, price,count,expiry.* FROM product, expiry WHERE expiry.product_id=product.id ORDER BY expiry_date ASC LIMIT ? OFFSET ?`,
       [perPage, offset]
     );
     // console.log(pageResult);
@@ -79,6 +79,18 @@ router.post("/", async (req, res, next) => {
     [id, expiry_date, count, discount]
   );
   res.json("資料更新囉");
+});
+
+// TODO 即期良品 DELETE by id
+router.delete("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  // console.log(id);
+
+  let [deleteExpiryById] = await pool.execute(
+    "DELETE FROM expiry WHERE id = ?",
+    [id]
+  );
+  res.send("成功刪除即期品");
 });
 
 module.exports = router;

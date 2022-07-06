@@ -38,7 +38,7 @@ const scoreChangeRules = [
 router.get("/comment/:user_id", async (req, res, next) => {
   // 1. 取得目前在第幾頁，而且利用 || 這個特性來做預設值
   let page = req.query.page || 1;
-  console.log("current page", page);
+  // console.log("current page", page);
   // 2. 取得目前總比數
   let [allResults, fields] = await pool.execute(
     "SELECT * FROM comment WHERE user_id = ?",
@@ -275,7 +275,7 @@ router.post("/photo", uploader_user.single("photo"), async (req, res) => {
   const photoName = req.file.originalname.split(".").slice(-2, -1)[0];
   const filename = req.file.originalname.split(".").slice(1)[0]; // 副檔名
   const path = req.file.path;
-  console.log(req.file);
+  // console.log(req.file);
 
   // let { name, price, description, express_id } = req.body;
   // let { name, price, description, express_id } = req.body;

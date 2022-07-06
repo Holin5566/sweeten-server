@@ -372,7 +372,7 @@ router.get("/comment/:id", async (req, res, next) => {
   const { id } = req.params;
   try {
     let [readProductComment] = await pool.execute(
-      "SELECT * FROM comment WHERE id = ?",
+      "SELECT * FROM comment WHERE product_id = ?",
       [id]
     );
     res.send(readProductComment);
@@ -602,6 +602,7 @@ router.delete("/:id", async (req, res, next) => {
   console.log("Deleted Data: ", deletedData);
   res.send("The data has been deleted.");
 });
+
 const uploader = require("../utils/uploader");
 
 // upload.single("photo") -> 抓取 key = photo 的資料, 存入 storage
