@@ -166,7 +166,7 @@ router.get("/category/:categoryId", async (req, res, next) => {
 
     // 取得這一頁的資料 select * ... limit ? offset ?
     const [pageResult] = await pool.execute(
-      `SELECT product.name AS naem, product.price, product.description, product.express_id, category.name AS category 
+      `SELECT product.name AS name, product.price, product.description, product.express_id, category.name AS category 
       FROM product, product_category, category 
       WHERE product.valid = ? AND product_category.product_id = product.id AND product_category.category_id = category.id AND category.id = ?
       ORDER BY price ${orderByPrice}`,
