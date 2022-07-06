@@ -48,7 +48,7 @@ router.get("/expire_product", async (req, res, next) => {
 
     // 取得這一頁的資料 select * ... limit ? offset ?
     let [pageResult] = await pool.execute(
-      `SELECT name, price,expiry.id,count,expiry.expiry_date FROM product, expiry WHERE expiry.product_id=product.id LIMIT ? OFFSET ?`,
+      `SELECT name, price,expiry.id,count,expiry.expiry_date, expiry.discount FROM product, expiry WHERE expiry.product_id=product.id LIMIT ? OFFSET ?`,
       [perPage, offset]
     );
     console.log(pageResult);
@@ -69,5 +69,14 @@ router.get("/expire_product", async (req, res, next) => {
   } catch (e) {
     res.send(e);
   }
+});
+// TODO 即期良品 POST
+router.post("/", async (req, res, next) => {
+  let { id, product_id, expiry_date, count, discount } = req.body;
+  let [inserData] = await pool.execute(
+    "INSERT INTO expiry (id, product_id, expiry_date, count,discount) VALUES (?,?,?,?,?)",
+    [id, product_id, expiry_date, count, discount]
+  );
+  res.json("資料更新囉");
 });
 module.exports = router;
