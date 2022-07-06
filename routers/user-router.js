@@ -37,7 +37,7 @@ const scoreChangeRules = [
 // TODO 會員全部評論
 router.get("/comment/:id", async (req, res, next) => {
   let [pageResult] = await pool.execute(
-    "SELECT product.name as product_name, comment.id as comment_id,product.price,product.id, user.full_name, comment.content, comment.score FROM comment, product, user WHERE user.id=comment.user_id AND comment.product_id=product.id AND user_id = ? ",
+    "SELECT product.name as product_name, comment.id as comment_id ,product.price,product.id, user.full_name, comment.content, comment.score FROM comment, product, user WHERE user.id=comment.user_id AND comment.product_id=product.id AND user_id = ? ",
     [req.params.id]
   );
   res.send(pageResult);
@@ -82,7 +82,7 @@ router.get("/comment/:id", async (req, res, next) => {
 // TODO 評論(字數)&(分數)的驗證
 router.post("/comment", commentScoretRules, async (req, res, next) => {
   let created_at = new Date();
-  let { id, user_id, product_id, content, score } = req.body;
+  let { user_id, product_id, content, score } = req.body;
   //拿出經過驗證後的結果
   const validateResults = validationResult(req);
   if (!validateResults.isEmpty()) {
@@ -90,8 +90,8 @@ router.post("/comment", commentScoretRules, async (req, res, next) => {
     return res.status(400).json({ code: 3001, error: error });
   }
   let [insertData] = await pool.execute(
-    "INSERT INTO comment (id, user_id, product_id, content, score, created_at) VALUE (?, ?, ?, ?, ?, ?)",
-    [id, user_id, product_id, content, score, created_at]
+    "INSERT INTO comment ( user_id, product_id, content, score, created_at) VALUE ( ?, ?, ?, ?, ?)",
+    [user_id, product_id, content, score, created_at]
   );
   console.log("New Comment Data:", insertData);
   res.json("謝謝你的評論");
@@ -284,7 +284,6 @@ router.post("/photo", uploader_user.single("photo"), async (req, res) => {
   const photoName = req.file.originalname.split(".").slice(-2, -1)[0];
   const filename = req.file.originalname.split(".").slice(1)[0]; // 副檔名
   const path = req.file.path;
-  console.log(req.file);
 
   // let { name, price, description, express_id } = req.body;
   // let { name, price, description, express_id } = req.body;
@@ -305,6 +304,7 @@ router.post("/photo", uploader_user.single("photo"), async (req, res) => {
   );
 
   res.send(req.file);
+  console.log("phtoName 照面的名字:", photoName);
 });
 
 // TODO 會員課程
