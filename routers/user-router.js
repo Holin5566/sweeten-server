@@ -284,7 +284,7 @@ router.post("/photo", uploader_user.single("photo"), async (req, res) => {
   const photoName = req.file.originalname.split(".").slice(-2, -1)[0];
   const filename = req.file.originalname.split(".").slice(1)[0]; // 副檔名
   const path = req.file.path;
-  console.log(req.file);
+  // console.log(req.file);
 
   // let { name, price, description, express_id } = req.body;
   // let { name, price, description, express_id } = req.body;

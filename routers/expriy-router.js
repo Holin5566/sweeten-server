@@ -38,7 +38,7 @@ router.get("/expire_product", async (req, res, next) => {
     // console.log("total records: ", totalRecords);
 
     // 計算總共有幾頁
-    let perPage = 4;
+    let perPage = 15;
     let totalPage = Math.ceil(totalRecords / perPage);
     // console.log("total page: ", totalPage);
 
@@ -48,10 +48,10 @@ router.get("/expire_product", async (req, res, next) => {
 
     // 取得這一頁的資料 select * ... limit ? offset ?
     let [pageResult] = await pool.execute(
-      `SELECT name, price,expiry.id,count,expiry.expiry_date, expiry.discount FROM product, expiry WHERE expiry.product_id=product.id LIMIT ? OFFSET ?`,
+      `SELECT name, price,count,expiry.* FROM product, expiry WHERE expiry.product_id=product.id ORDER BY expiry_date ASC LIMIT ? OFFSET ?`,
       [perPage, offset]
     );
-    console.log(pageResult);
+    // console.log(pageResult);
 
     // 回覆給前端
     if (pageResult.length === 0) {
@@ -72,11 +72,24 @@ router.get("/expire_product", async (req, res, next) => {
 });
 // TODO 即期良品 POST
 router.post("/", async (req, res, next) => {
-  let { id, product_id, expiry_date, count, discount } = req.body;
+  let { id, expiry_date, count, discount } = req.body;
   let [inserData] = await pool.execute(
-    "INSERT INTO expiry (id, product_id, expiry_date, count,discount) VALUES (?,?,?,?,?)",
-    [id, product_id, expiry_date, count, discount]
+    "INSERT INTO expiry (product_id, expiry_date, count, discount) VALUES (?, ?, ?, ?)",
+    [id, expiry_date, count, discount]
   );
   res.json("資料更新囉");
 });
+
+// TODO 即期良品 DELETE by id
+router.delete("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  // console.log(id);
+
+  let [deleteExpiryById] = await pool.execute(
+    "DELETE FROM expiry WHERE id = ?",
+    [id]
+  );
+  res.send("成功刪除即期品");
+});
+
 module.exports = router;
