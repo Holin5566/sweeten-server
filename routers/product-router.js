@@ -551,7 +551,7 @@ router.post("/photo", uploader.single("photo"), async (req, res) => {
   const path = req.file.path;
   let { name, price, description, express_id } = req.body;
 
-  console.log(req.file, filename);
+  console.log(req.file);
 
   // 產品資料 sql
   let [insertData] = await pool.execute(

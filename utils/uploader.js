@@ -13,8 +13,8 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     // "name.jpg" -> ["name","jpg"] -> ext:"jpg"
     let ext = file.originalname.split(".").pop();
-    // let newFilename = `${Date.now()}.${ext}`;
-    let newFilename = `${req.body.id}.jpg`;
+    let newFilename = `${Date.now()}.${ext}`;
+    // let newFilename = `${req.body.id}.jpg`;
     cb(null, newFilename);
   },
 });
@@ -34,7 +34,7 @@ const fileFilter = (req, file, cb) => {
 //NOTE 大小限制
 const limits = {
   // 1k = 1024
-  fileSize: 200 * 1024,
+  fileSize: 1024 * 1024,
   // fieldNameSize :	Max field name size	// 100 bytes
   // fieldSize :	Max field value size (in bytes)	// 1MB
   // fields :	Max number of non-file fields	// Infinity
