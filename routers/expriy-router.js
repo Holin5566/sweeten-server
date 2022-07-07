@@ -8,6 +8,7 @@ router.use((req, res, next) => {
   console.log("request is comming userRouter");
   next();
 });
+// NOTE READ 即期品全部資料沒有頁碼
 
 // TODO 即期品 Read
 router.get("/expire_product", async (req, res, next) => {
