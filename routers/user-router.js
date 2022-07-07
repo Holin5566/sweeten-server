@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const { v4: uuidv4 } = require("uuid");
+const { empty } = require("uuidv4");
 require("dotenv").config();
 
 //表單驗證用套件
@@ -32,40 +34,49 @@ const scoreChangeRules = [
     .withMessage("請請至少給出一點分數吧(單純只改分數)"),
 ];
 
-// TODO 會員評論 READ 總數的頁碼
-router.get("/comment/:user_id", async (req, res, next) => {
-  // 1. 取得目前在第幾頁，而且利用 || 這個特性來做預設值
-  let page = req.query.page || 1;
-  console.log("current page", page);
-  // 2. 取得目前總比數
-  let [allResults, fields] = await pool.execute(
-    "SELECT * FROM comment WHERE user_id = ?",
-    [req.params.user_id]
-  );
-  // res.json(allResults);
-  // console.log(allResults);
-  const total = allResults.length;
-  // 3. 計算總共有幾頁
-  const perPage = 3;
-  const lastPage = Math.ceil(total / perPage);
-  // 4. 計算 offect 是多少(計算要跳過幾筆)
-  let offect = (page - 1) * perPage;
-  // 5. 取得一頁的資料
+// TODO 會員全部評論
+router.get("/comment/:id", async (req, res, next) => {
   let [pageResult] = await pool.execute(
-    "SELECT product.name as product_name,product.id as product_id, product.price, user.full_name, comment.content, comment.score FROM comment, product, user WHERE user.id=comment.user_id AND comment.product_id=product.id AND user_id = ?  LIMIT ? OFFSET ?",
-    [req.params.user_id, perPage, offect]
+    "SELECT product.name as product_name, comment.id as comment_id,product.price,product.id, user.full_name, comment.content, comment.score FROM comment, product, user WHERE user.id=comment.user_id AND comment.product_id=product.id AND user_id = ? ",
+    [req.params.id]
   );
-  // 6. 回覆給前端的資料
-  res.json({
-    // 用來儲存所有跟頁碼有關的資訊
-    pagination: {
-      total,
-      lastPage,
-      page,
-    },
-    allResults: pageResult,
-  });
+  res.send(pageResult);
 });
+
+// TODO 會員評論 READ 總數的頁碼
+// router.get("/comment/:user_id", async (req, res, next) => {
+//   // 1. 取得目前在第幾頁，而且利用 || 這個特性來做預設值
+//   let page = req.query.page || 1;
+//   console.log("current page", page);
+//   // 2. 取得目前總比數
+//   let [allResults, fields] = await pool.execute(
+//     "SELECT * FROM comment WHERE user_id = ?",
+//     [req.params.user_id]
+//   );
+//   // res.json(allResults);
+//   // console.log(allResults);
+//   const total = allResults.length;
+//   // 3. 計算總共有幾頁
+//   const perPage = 3;
+//   const lastPage = Math.ceil(total / perPage);
+//   // 4. 計算 offect 是多少(計算要跳過幾筆)
+//   let offect = (page - 1) * perPage;
+//   // 5. 取得一頁的資料
+//   let [pageResult] = await pool.execute(
+//     "SELECT product.name as product_name, product.price, user.full_name, comment.content, comment.score FROM comment, product, user WHERE user.id=comment.user_id AND comment.product_id=product.id AND user_id = ?  LIMIT ? OFFSET ?",
+//     [req.params.user_id, perPage, offect]
+//   );
+//   // 6. 回覆給前端的資料
+//   res.json({
+//     // 用來儲存所有跟頁碼有關的資訊
+//     pagination: {
+//       total,
+//       lastPage,
+//       page,
+//     },
+//     allResults: pageResult,
+//   });
+// });
 
 // TODO 會員評論 CREATE
 // TODO 評論(字數)&(分數)的驗證
@@ -222,7 +233,7 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-// TODO
+// TODO 更新會員資料
 router.patch("/:id", async (req, res, next) => {
   const { id } = req.params;
   const newData = req.body;
@@ -260,6 +271,40 @@ router.patch("/:id", async (req, res, next) => {
     res.status(404);
     res.send(e);
   }
+});
+const uploader_user = require("../utils/uploader_user");
+// NOTE 會員新增照片
+
+router.post("/photo", uploader_user.single("photo"), async (req, res) => {
+  // console.log(req.file);
+  let { id } = req.body;
+  // let created_at = new Date();
+
+  // let productId = () => String(+new Date()).slice(0, 10);
+  const photoName = req.file.originalname.split(".").slice(-2, -1)[0];
+  const filename = req.file.originalname.split(".").slice(1)[0]; // 副檔名
+  const path = req.file.path;
+  // console.log(req.file);
+
+  // let { name, price, description, express_id } = req.body;
+  // let { name, price, description, express_id } = req.body;
+
+  // console.log(req.file, filename);
+
+  // 產品資料 sql
+  // let [insertData] = await pool.execute(
+  //   // query excute 差異
+  //   "INSERT INTO product (id, name, price, description, express_id, created_at, valid) VALUES ( ?, ?, ?, ?, ?, ?, ?)",
+  //   [id, name, price, description, express_id, created_at, 1]
+  // );
+
+  // 產品圖片 sql
+  let [insertImg] = await pool.execute(
+    "INSERT INTO user_photo (user_id, name, path) VALUES (?, ?, ?)",
+    [id, photoName, path]
+  );
+
+  res.send(req.file);
 });
 
 // TODO 會員課程
