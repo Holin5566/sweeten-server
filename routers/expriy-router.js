@@ -73,11 +73,24 @@ router.get("/expire_product", async (req, res, next) => {
 });
 // TODO 即期良品 POST
 router.post("/", async (req, res, next) => {
-  let { id, product_id, expiry_date, count, discount } = req.body;
+  let { id, expiry_date, count, discount } = req.body;
   let [inserData] = await pool.execute(
-    "INSERT INTO expiry (id, product_id, expiry_date, count,discount) VALUES (?,?,?,?,?)",
-    [id, product_id, expiry_date, count, discount]
+    "INSERT INTO expiry (product_id, expiry_date, count, discount) VALUES (?, ?, ?, ?)",
+    [id, expiry_date, count, discount]
   );
   res.json("資料更新囉");
 });
+
+// TODO 即期良品 DELETE by id
+router.delete("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  // console.log(id);
+
+  let [deleteExpiryById] = await pool.execute(
+    "DELETE FROM expiry WHERE id = ?",
+    [id]
+  );
+  res.send("成功刪除即期品");
+});
+
 module.exports = router;

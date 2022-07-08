@@ -133,6 +133,18 @@ router.get("/comment/product/:id", async (req, res, next) => {
   }
 });
 
+/* ------------------------------ [完成] Read product categories ------------------------------ */
+router.get("/category", async (req, res, next) => {
+  try {
+    const [productCategories] = await pool.execute(`SELECT * from category`);
+
+    res.send(productCategories);
+  } catch (e) {
+    res.status(404).send(e);
+  }
+});
+
+/* ---------------------------- [完成] Read category by category id ---------------------------- */
 router.get("/category/:categoryId", async (req, res, next) => {
   try {
     // 價格排序
@@ -146,36 +158,19 @@ router.get("/category/:categoryId", async (req, res, next) => {
     // 種類篩選
     let { categoryId } = req.params;
 
-    // 頁碼
-    let page = req.query.page || 1;
-
     // 取得目前的總筆數
-    const [product] = await pool.execute(
-      `SELECT product.name AS product, product.price, product.description, product.express_id, category.name AS category 
-      FROM product, product_category, category 
-      WHERE product.valid = ? AND product_category.product_id = product.id AND product_category.category_id = category.id AND category.id = ?`,
-      [1, categoryId]
-    );
-    const totalResults = product.length;
-
-    // 計算總共有幾頁
-    const perPage = 10;
-    const totalPage = Math.ceil(totalResults / perPage);
-    // console.log(totalPage);
-
-    // 計算 offset 是多少(計算要跳過幾筆)
-    const offset = (page - 1) * perPage;
-    // console.log(offset);
+    // const [product] = await pool.execute(
+    //   `SELECT product.*, category.name AS category_name FROM product, category, product_category WHERE product.id = product_category.product_id AND category.id = product_category.category_id AND valid = ? AND category.id = ?`,
+    //   [1, categoryId]
+    // );
 
     // 取得這一頁的資料 select * ... limit ? offset ?
     const [pageResult] = await pool.execute(
-      `SELECT product.name AS product, product.price, product.description, product.express_id, category.name AS category 
+      `SELECT product.name AS name, product.price, product.description, product.express_id, category.name AS category 
       FROM product, product_category, category 
       WHERE product.valid = ? AND product_category.product_id = product.id AND product_category.category_id = category.id AND category.id = ?
-      ORDER BY price ${orderByPrice}
-      LIMIT ?
-      OFFSET ?`,
-      [1, categoryId, perPage, offset]
+      ORDER BY price ${orderByPrice}`,
+      [1, categoryId]
     );
 
     // 回覆給前端
@@ -183,11 +178,6 @@ router.get("/category/:categoryId", async (req, res, next) => {
       res.status(404).json(pageResult);
     } else {
       res.json({
-        pagination: {
-          totalResults,
-          totalPage,
-          page,
-        },
         data: pageResult,
       });
     }
@@ -195,6 +185,70 @@ router.get("/category/:categoryId", async (req, res, next) => {
     res.status(404).send(e);
   }
 });
+
+// router.get("/category/:categoryId", async (req, res, next) => {
+//   try {
+//     // 價格排序
+//     let priceOrder = req.query.priceOrder;
+//     if (priceOrder == "2") {
+//       orderByPrice = "DESC";
+//     } else {
+//       orderByPrice = "ASC";
+//     }
+
+//     // 種類篩選
+//     let { categoryId } = req.params;
+
+//     // 頁碼
+//     let page = req.query.page || 1;
+
+//     // 取得目前的總筆數
+//     const [product] = await pool.execute(
+//       `SELECT product.name AS product, product.price, product.description, product.express_id, category.name AS category
+//       FROM product, product_category, category
+//       WHERE product.valid = ? AND product_category.product_id = product.id AND product_category.category_id = category.id AND category.id = ?`,
+//       [1, categoryId]
+//     );
+//     const totalResults = product.length;
+
+//     // 計算總共有幾頁
+//     const perPage = 10;
+//     const totalPage = Math.ceil(totalResults / perPage);
+//     // console.log(totalPage);
+
+//     // 計算 offset 是多少(計算要跳過幾筆)
+//     const offset = (page - 1) * perPage;
+//     // console.log(offset);
+
+//     // 取得這一頁的資料 select * ... limit ? offset ?
+//     const [pageResult] = await pool.execute(
+//       `SELECT product.name AS product, product.price, product.description, product.express_id, category.name AS category
+//       FROM product, product_category, category
+//       WHERE product.valid = ? AND product_category.product_id = product.id AND product_category.category_id = category.id AND category.id = ?
+//       ORDER BY price ${orderByPrice}
+//       LIMIT ?
+//       OFFSET ?`,
+//       [1, categoryId, perPage, offset]
+//     );
+
+//     // 回覆給前端
+//     if (pageResult.length === 0) {
+//       res.status(404).json(pageResult);
+//     } else {
+//       res.json({
+//         pagination: {
+//           totalResults,
+//           totalPage,
+//           page,
+//         },
+//         data: pageResult,
+//       });
+//       res.send(pageResult)
+//     }
+//   } catch (e) {
+//     res.status(404).send(e);
+//   }
+// });
 
 // [完成] Read Product (所有產品 valid = 0)
 router.get("/discontinued", async (req, res, next) => {
@@ -318,7 +372,7 @@ router.get("/comment/:id", async (req, res, next) => {
   const { id } = req.params;
   try {
     let [readProductComment] = await pool.execute(
-      "SELECT * FROM comment WHERE id = ?",
+      "SELECT * FROM comment WHERE product_id = ?",
       [id]
     );
     res.send(readProductComment);
@@ -536,6 +590,7 @@ router.delete("/:id", async (req, res, next) => {
   console.log("Deleted Data: ", deletedData);
   res.send("The data has been deleted.");
 });
+
 const uploader = require("../utils/uploader");
 
 // upload.single("photo") -> 抓取 key = photo 的資料, 存入 storage
