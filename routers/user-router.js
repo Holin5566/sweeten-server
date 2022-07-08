@@ -283,7 +283,9 @@ router.post("/photo", uploader_user.single("photo"), async (req, res) => {
   // let productId = () => String(+new Date()).slice(0, 10);
   const photoName = req.file.originalname.split(".").slice(-2, -1)[0];
   const filename = req.file.originalname.split(".").slice(1)[0]; // 副檔名
-  const path = req.file.path;
+  // const path = req.file.path;
+  console.log(req.file.filename);
+  const path = req.file ? "/user/" + req.file.filename : "";
 
   // let { name, price, description, express_id } = req.body;
   // let { name, price, description, express_id } = req.body;
@@ -296,6 +298,12 @@ router.post("/photo", uploader_user.single("photo"), async (req, res) => {
   //   "INSERT INTO product (id, name, price, description, express_id, created_at, valid) VALUES ( ?, ?, ?, ?, ?, ?, ?)",
   //   [id, name, price, description, express_id, created_at, 1]
   // );
+
+  // 刪除原本圖片 sql
+  let [delImg] = await pool.execute(
+    "DELETE FROM user_photo WHERE user_id = ?",
+    [id]
+  );
 
   // 產品圖片 sql
   let [insertImg] = await pool.execute(

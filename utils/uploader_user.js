@@ -11,10 +11,12 @@ const storage = multer.diskStorage({
 
   // 定義檔案名稱
   filename: (req, file, cb) => {
+    const { id } = req.body;
+    console.log("file", req.body);
     // "name.jpg" -> ["name","jpg"] -> ext:"jpg"
     let ext = file.originalname.split(".").pop();
-    let newFilename = `${Date.now()}.${ext}`;
-    //     let newFilename = `${req.body.id}.jpg`;
+    // let newFilename = `${Date.now()}.${ext}`;
+    let newFilename = `${req.body.id}.jpg`;
     cb(null, newFilename);
   },
 });

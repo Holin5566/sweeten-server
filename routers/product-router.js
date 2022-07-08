@@ -543,7 +543,7 @@ router.post("/photo", uploader.single("photo"), async (req, res) => {
   // console.log(req.file);
   let { id } = req.body;
   let created_at = new Date();
-  // console.log(req.body);
+  console.log(req.body);
 
   // let productId = () => String(+new Date()).slice(0, 10);
   const photoName = req.file.originalname.split(".").slice(-2, -1)[0];

@@ -39,7 +39,7 @@ router.get("/expire_product", async (req, res, next) => {
     // console.log("total records: ", totalRecords);
 
     // 計算總共有幾頁
-    let perPage = 4;
+    let perPage = 15;
     let totalPage = Math.ceil(totalRecords / perPage);
     // console.log("total page: ", totalPage);
 
@@ -49,10 +49,10 @@ router.get("/expire_product", async (req, res, next) => {
 
     // 取得這一頁的資料 select * ... limit ? offset ?
     let [pageResult] = await pool.execute(
-      `SELECT name, price,product.id as expiry_id,count,expiry.expiry_date, expiry.discount FROM product, expiry WHERE expiry.product_id=product.id LIMIT ? OFFSET ?`,
+      `SELECT name, price,count,expiry.* FROM product, expiry WHERE expiry.product_id=product.id ORDER BY expiry_date ASC LIMIT ? OFFSET ?`,
       [perPage, offset]
     );
-    console.log(pageResult);
+    // console.log(pageResult);
 
     // 回覆給前端
     if (pageResult.length === 0) {
