@@ -34,25 +34,8 @@ const scoreChangeRules = [
     .withMessage("請請至少給出一點分數吧(單純只改分數)"),
 ];
 
-// TODO 會員評論 READ 總數的頁碼
-router.get("/comment/:user_id", async (req, res, next) => {
-  // 1. 取得目前在第幾頁，而且利用 || 這個特性來做預設值
-  let page = req.query.page || 1;
-  // console.log("current page", page);
-  // 2. 取得目前總比數
-  let [allResults, fields] = await pool.execute(
-    "SELECT * FROM comment WHERE user_id = ?",
-    [req.params.user_id]
-  );
-  // res.json(allResults);
-  // console.log(allResults);
-  const total = allResults.length;
-  // 3. 計算總共有幾頁
-  const perPage = 3;
-  const lastPage = Math.ceil(total / perPage);
-  // 4. 計算 offect 是多少(計算要跳過幾筆)
-  let offect = (page - 1) * perPage;
-  // 5. 取得一頁的資料
+// TODO 會員全部評論
+router.get("/comment/:id", async (req, res, next) => {
   let [pageResult] = await pool.execute(
     "SELECT product.name as product_name, comment.id as comment_id ,product.price,product.id, user.full_name, comment.content, comment.score FROM comment, product, user WHERE user.id=comment.user_id AND comment.product_id=product.id AND user_id = ? ",
     [req.params.id]
@@ -243,7 +226,10 @@ router.post("/favorite_product", async (req, res, next) => {
 router.get("/:id", async (req, res, next) => {
   let { id } = req.params;
   try {
-    let [userData] = await pool.execute("SELECT * FROM user WHERE id=?", [id]);
+    let [userData] = await pool.execute(
+      "SELECT * FROM user, user_photo WHERE id=? AND user.id=user_photo.user_id",
+      [id]
+    );
     res.send(userData);
   } catch (e) {
     res.send(e);
