@@ -620,7 +620,7 @@ router.post("/photo", uploader.single("photo"), async (req, res) => {
     "INSERT INTO product_photo (product_id, name, path) VALUES (?, ?, ?)",
     [id, photoName, path]
   );
-
+  console.log(id);
   res.send(req.file);
 });
 
