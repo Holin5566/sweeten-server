@@ -1,6 +1,7 @@
 const multer = require("multer");
 const path = require("path");
 const storePath = path.join(__dirname, "..", "public", "user");
+// console.log("__dirname", __dirname);
 
 //NOTE 儲存路徑設定
 const storage = multer.diskStorage({
@@ -11,12 +12,10 @@ const storage = multer.diskStorage({
 
   // 定義檔案名稱
   filename: (req, file, cb) => {
-    const { id } = req.body;
-    console.log("file", req.body);
     // "name.jpg" -> ["name","jpg"] -> ext:"jpg"
     let ext = file.originalname.split(".").pop();
-    // let newFilename = `${Date.now()}.${ext}`;
-    let newFilename = `${req.body.id}.jpg`;
+    let newFilename = `${Date.now()}.${ext}`;
+    //     let newFilename = `${req.body.id}.jpg`;
     cb(null, newFilename);
   },
 });
@@ -37,13 +36,13 @@ const fileFilter = (req, file, cb) => {
 const limits = {
   // 1k = 1024
   fileSize: 200 * 1024,
-  // fieldNameSize :	Max field name size	// 100 bytes
-  // fieldSize :	Max field value size (in bytes)	// 1MB
-  // fields :	Max number of non-file fields	// Infinity
-  // fileSize :	For multipart forms, the max file size (in bytes)	// Infinity
-  // files :	For multipart forms, the max number of file fields	// Infinity
-  // parts :	For multipart forms, the max number of parts (fields + files)	// Infinity
-  // headerPairs :	For multipart forms, the max number of header key=>value pairs to parse	// 2000
+  // fieldNameSize :  Max field name size // 100 bytes
+  // fieldSize :  Max field value size (in bytes) // 1MB
+  // fields : Max number of non-file fields // Infinity
+  // fileSize : For multipart forms, the max file size (in bytes) // Infinity
+  // files :  For multipart forms, the max number of file fields  // Infinity
+  // parts :  For multipart forms, the max number of parts (fields + files) // Infinity
+  // headerPairs :  For multipart forms, the max number of header key=>value pairs to parse // 2000
 };
 
 const uploader_user = multer({ storage, fileFilter, limits });
