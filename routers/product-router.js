@@ -137,7 +137,7 @@ router.get("/comment/product/:id", async (req, res, next) => {
 router.get("/category", async (req, res, next) => {
   try {
     const [productCategories] = await pool.execute(`SELECT * from category`);
-
+    // productCategories.forEach((item) => (item.id = item.product_id));
     res.send(productCategories);
   } catch (e) {
     res.status(404).send(e);
@@ -166,7 +166,7 @@ router.get("/category/:categoryId", async (req, res, next) => {
 
     // 取得這一頁的資料 select * ... limit ? offset ?
     const [pageResult] = await pool.execute(
-      `SELECT product.name AS name, product.price, product.description, product.express_id, category.name AS category 
+      `SELECT product.name AS name, product.price, product.description, product_category.product_id, product.express_id, category.name AS category 
       FROM product, product_category, category 
       WHERE product.valid = ? AND product_category.product_id = product.id AND product_category.category_id = category.id AND category.id = ?
       ORDER BY price ${orderByPrice}`,
