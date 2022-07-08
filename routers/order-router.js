@@ -67,8 +67,6 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// FIXME order 要修正 sql 語法
-
 // [完成] Read order (個人所有訂單)
 router.get("/user/:user_id", async (req, res, next) => {
   const { user_id } = req.params;
@@ -160,15 +158,53 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+// FIXME order 要修正 sql 語法
+
+// [完成] Create order
+// router.post("/", async (req, res, next) => {
+//   const { user_id, coupon_id, order_status_id } = req.body;
+//   // console.log(user_id, coupon_id, order_status_id)
+//   try {
+//     let [newOrder] = await pool.execute(
+//       "INSERT INTO order_info (user_id, coupon_id, order_status_id) VALUES (?, ?, ?)",
+//       [user_id, coupon_id, order_status_id]
+//     );
+//     res.send("新增訂單成功");
+//   } catch (e) {
+//     res.status(404).send(e);
+//   }
+// });
+
 // [完成] Create order
 router.post("/", async (req, res, next) => {
-  const { user_id, coupon_id, order_status_id } = req.body;
-  // console.log(user_id, coupon_id, order_status_id)
+  const { order_id, user_id, address, product_id, price, time } = req.body;
+  // console.log(order_id, user_id, address, product_id, price, time)
+
+  // order id
+  // const dateObj = new Date();
+  // let year = dateObj.getFullYear();
+  // let month = dateObj.getMonth();
+  // month = ("0" + month).slice(-2);
+  // let date = dateObj.getDate();
+  // date = ("0" + date).slice(-2);
+  // let hour = dateObj.getHours();
+  // hour = ("0" + hour).slice(-2);
+  // let minute = dateObj.getMinutes();
+  // minute = ("0" + minute).slice(-2);
+  // let second = dateObj.getSeconds();
+  // second = ("0" + second).slice(-2);
+  // const time = `${year}-${month}-${date} ${hour}:${minute}:${second}`;
+
   try {
-    let [newOrder] = await pool.execute(
-      "INSERT INTO order_info (user_id, coupon_id, order_status_id) VALUES (?, ?, ?)",
-      [user_id, coupon_id, order_status_id]
+    let [newOrder_info] = await pool.execute(
+      "INSERT INTO order_info (id, user_id, order_status_id, address, payment_id, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+      [order_id, user_id, 1, address, 0, time]
     );
+    let [newOrderProducts] = await pool.execute(
+      "INSERT INTO orderProduct (order_info_id, product_id, price) VALUES (?, ?, ?)",
+      [order_id, product_id, price]
+    );
+
     res.send("新增訂單成功");
   } catch (e) {
     res.status(404).send(e);
