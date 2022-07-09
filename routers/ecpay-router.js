@@ -13,7 +13,7 @@ router.use((req, res, next) => {
 router.post("/sucess", (req, res) => {
   console.log("pay sucess");
   console.log(req.body);
-  res.redirect(301, "http://localhost:3000/main/test");
+  res.redirect(301, "http://localhost:3000/");
 });
 
 /* --------------------------------- 確認付款狀態 --------------------------------- */
