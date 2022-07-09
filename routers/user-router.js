@@ -90,8 +90,8 @@ router.post("/comment", commentScoretRules, async (req, res, next) => {
     return res.status(400).json({ code: 3001, error: error });
   }
   let [insertData] = await pool.execute(
-    "INSERT INTO comment ( user_id, product_id, content, score, created_at) VALUE (?, ?, ?, ?, ?, ?)",
-    [user_id, product_id, content, score, created_at]
+    "INSERT INTO comment ( user_id, product_id, content, score) VALUE (?, ?, ?, ?)",
+    [user_id, product_id, content, score]
   );
   console.log("New Comment Data:", insertData);
   res.json("謝謝你的評論");
