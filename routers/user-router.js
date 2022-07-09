@@ -37,7 +37,7 @@ const scoreChangeRules = [
 // TODO 會員全部評論
 router.get("/comment/:id", async (req, res, next) => {
   let [pageResult] = await pool.execute(
-    "SELECT product.name as product_name, comment.id as comment_id,product.price,product.id, user.full_name, comment.content, comment.score FROM comment, product, user WHERE user.id=comment.user_id AND comment.product_id=product.id AND user_id = ? ",
+    "SELECT product.name as product_name, comment.id as comment_id ,product.price,product.id, user.full_name, comment.content, comment.score FROM comment, product, user WHERE user.id=comment.user_id AND comment.product_id=product.id AND user_id = ? ",
     [req.params.id]
   );
   res.send(pageResult);
@@ -90,8 +90,8 @@ router.post("/comment", commentScoretRules, async (req, res, next) => {
     return res.status(400).json({ code: 3001, error: error });
   }
   let [insertData] = await pool.execute(
-    "INSERT INTO comment ( user_id, product_id, content, score) VALUE (?, ?, ?, ?)",
-    [user_id, product_id, content, score]
+    "INSERT INTO comment ( user_id, product_id, content, score, created_at) VALUE ( ?, ?, ?, ?, ?)",
+    [user_id, product_id, content, score, created_at]
   );
   console.log("New Comment Data:", insertData);
   res.json("謝謝你的評論");
@@ -226,7 +226,10 @@ router.post("/favorite_product", async (req, res, next) => {
 router.get("/:id", async (req, res, next) => {
   let { id } = req.params;
   try {
-    let [userData] = await pool.execute("SELECT * FROM user WHERE id=?", [id]);
+    let [userData] = await pool.execute(
+      "SELECT * FROM user, user_photo WHERE id=? AND user.id=user_photo.user_id",
+      [id]
+    );
     res.send(userData);
   } catch (e) {
     res.send(e);
@@ -283,8 +286,9 @@ router.post("/photo", uploader_user.single("photo"), async (req, res) => {
   // let productId = () => String(+new Date()).slice(0, 10);
   const photoName = req.file.originalname.split(".").slice(-2, -1)[0];
   const filename = req.file.originalname.split(".").slice(1)[0]; // 副檔名
-  const path = req.file.path;
-  // console.log(req.file);
+  // const path = req.file.path;
+  console.log(req.file.filename);
+  const path = req.file ? "/user/" + req.file.filename : "";
 
   // let { name, price, description, express_id } = req.body;
   // let { name, price, description, express_id } = req.body;
@@ -298,6 +302,12 @@ router.post("/photo", uploader_user.single("photo"), async (req, res) => {
   //   [id, name, price, description, express_id, created_at, 1]
   // );
 
+  // 刪除原本圖片 sql
+  let [delImg] = await pool.execute(
+    "DELETE FROM user_photo WHERE user_id = ?",
+    [id]
+  );
+
   // 產品圖片 sql
   let [insertImg] = await pool.execute(
     "INSERT INTO user_photo (user_id, name, path) VALUES (?, ?, ?)",
@@ -305,6 +315,7 @@ router.post("/photo", uploader_user.single("photo"), async (req, res) => {
   );
 
   res.send(req.file);
+  console.log("phtoName 照面的名字:", photoName);
 });
 
 // TODO 會員課程
