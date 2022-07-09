@@ -3,7 +3,6 @@ const LocalStrategy = require("passport-local").Strategy;
 const argon2 = require("argon2");
 const passport = require("passport");
 const pool = require("./dbConnect");
-const axios = require("axios").default;
 const { v4: uuidv4 } = require("uuid");
 const validate = require("./validation");
 
@@ -15,7 +14,6 @@ passport.serializeUser(async (user, done) => {
 
   done(null, { ...user, from: "serializeUser" }); //user 存入 session
 });
-
 /* --------------------------- 收到 req，解密 session -------------------------- */
 // deserializeUser()：可藉由從 Session 中獲得的資訊去撈該 user 的資料。
 passport.deserializeUser((user, done) => {

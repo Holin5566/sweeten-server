@@ -49,7 +49,7 @@ router.get("/expire_product", async (req, res, next) => {
 
     // 取得這一頁的資料 select * ... limit ? offset ?
     let [pageResult] = await pool.execute(
-      `SELECT name, price,count,expiry.* FROM product, expiry WHERE expiry.product_id=product.id ORDER BY expiry_date ASC LIMIT ? OFFSET ?`,
+      `SELECT name, price,count,description, expiry.* FROM product, expiry WHERE expiry.product_id=product.id ORDER BY expiry_date ASC LIMIT ? OFFSET ?`,
       [perPage, offset]
     );
     // console.log(pageResult);
