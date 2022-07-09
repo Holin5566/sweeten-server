@@ -82,7 +82,7 @@ router.get("/comment/:id", async (req, res, next) => {
 // TODO 評論(字數)&(分數)的驗證
 router.post("/comment", commentScoretRules, async (req, res, next) => {
   let created_at = new Date();
-  let { id, user_id, product_id, content, score } = req.body;
+  let { user_id, product_id, content, score } = req.body;
   //拿出經過驗證後的結果
   const validateResults = validationResult(req);
   if (!validateResults.isEmpty()) {
@@ -90,8 +90,8 @@ router.post("/comment", commentScoretRules, async (req, res, next) => {
     return res.status(400).json({ code: 3001, error: error });
   }
   let [insertData] = await pool.execute(
-    "INSERT INTO comment (id, user_id, product_id, content, score, created_at) VALUE (?, ?, ?, ?, ?, ?)",
-    [id, user_id, product_id, content, score, created_at]
+    "INSERT INTO comment ( user_id, product_id, content, score, created_at) VALUE (?, ?, ?, ?, ?, ?)",
+    [user_id, product_id, content, score, created_at]
   );
   console.log("New Comment Data:", insertData);
   res.json("謝謝你的評論");
