@@ -591,6 +591,7 @@ router.delete("/:id", async (req, res, next) => {
   res.send("The data has been deleted.");
 });
 
+/* --------------------------------- photo --------------------------------------- */
 const uploader = require("../utils/uploader");
 
 // upload.single("photo") -> 抓取 key = photo 的資料, 存入 storage
