@@ -37,7 +37,6 @@ const newOrder = (orderState) => {
     ReturnURL: process.env.LOCAL_URL + "/api/ecpay",
     OrderResultURL: process.env.LOCAL_URL + "/api/ecpay/sucess",
   };
-
   return base_param;
 };
 
