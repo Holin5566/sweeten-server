@@ -37,7 +37,7 @@ router.post("/check", async (req, res) => {
   }
 });
 
-// NOTE 結帳
+// NOTE 結帳.
 router.post("/", async (req, res) => {
   const newOrder = require("../utils/ecpayConfig").newOrder;
   const options = require("../utils/ecpayConfig").options;
