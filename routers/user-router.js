@@ -227,7 +227,7 @@ router.get("/:id", async (req, res, next) => {
   let { id } = req.params;
   try {
     let [userData] = await pool.execute(
-      "SELECT * FROM user, user_photo WHERE id=? AND user.id=user_photo.user_id",
+      "SELECT * FROM user LEFT JOIN user_photo ON user.id=user_photo.user_id WHERE user.id=?",
       [id]
     );
     res.send(userData);
