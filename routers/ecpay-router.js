@@ -55,7 +55,7 @@ router.post("/", async (req, res) => {
     products,
   } = orderState;
   const base_param = newOrder({ TotalAmount, TradeDesc, ItemName });
-  //req.body =  {
+  //req.body =  {...
   //     "TotalAmount":總價錢,
   //     "TradeDesc":訂單描述,
   //     "ItemName":商品A#商品B#商品C
